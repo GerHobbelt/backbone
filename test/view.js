@@ -13,27 +13,35 @@ $(document).ready(function() {
 
   });
 
-  test("View: constructor", function() {
+  test("View: constructor", 4, function() {
     equal(view.el.id, 'test-view');
     equal(view.el.className, 'test-view');
     equal(view.options.id, 'test-view');
     equal(view.options.className, 'test-view');
   });
 
-  test("View: jQuery", function() {
+  test("View: jQuery", 2, function() {
     view.setElement(document.body);
     ok(view.$('#qunit-header a').get(0).innerHTML.match(/Backbone Test Suite/));
     ok(view.$('#qunit-header a').get(1).innerHTML.match(/Backbone Speed Suite/));
   });
 
-  test("View: make", function() {
+  test("View: make", 3, function() {
     var div = view.make('div', {id: 'test-div'}, "one two three");
     equal(div.tagName.toLowerCase(), 'div');
     equal(div.id, 'test-div');
     equal($(div).text(), 'one two three');
   });
 
-  test("View: initialize", function() {
+  test("View: make can take falsy values for content", 2, function() {
+    var div = view.make('div', {id: 'test-div'}, 0);
+    equal($(div).text(), '0');
+
+    var div = view.make('div', {id: 'test-div'}, '');
+    equal($(div).text(), '');
+  });
+
+  test("View: initialize", 1, function() {
     var View = Backbone.View.extend({
       initialize: function() {
         this.one = 1;
@@ -43,7 +51,7 @@ $(document).ready(function() {
     equal(view.one, 1);
   });
 
-  test("View: delegateEvents", function() {
+  test("View: delegateEvents", 6, function() {
     var counter = 0;
     var counter2 = 0;
     view.setElement(document.body);
@@ -63,7 +71,7 @@ $(document).ready(function() {
     equal(counter2, 3);
   });
 
-  test("View: delegateEvents allows functions for callbacks", function() {
+  test("View: delegateEvents allows functions for callbacks", 3, function() {
     view.counter = 0;
     view.setElement("#qunit-banner");
     var events = {"click": function() { this.counter++; }};
@@ -77,7 +85,7 @@ $(document).ready(function() {
     equal(view.counter, 3);
   });
 
-  test("View: undelegateEvents", function() {
+  test("View: undelegateEvents", 6, function() {
     var counter = 0;
     var counter2 = 0;
     view.setElement(document.body);
@@ -99,7 +107,7 @@ $(document).ready(function() {
     equal(counter2, 3);
   });
 
-  test("View: _ensureElement with DOM node el", function() {
+  test("View: _ensureElement with DOM node el", 1, function() {
     var ViewClass = Backbone.View.extend({
       el: document.body
     });
@@ -107,18 +115,18 @@ $(document).ready(function() {
     equal(view.el, document.body);
   });
 
-  test("View: _ensureElement with string el", function() {
+  test("View: _ensureElement with string el", 3, function() {
     var ViewClass = Backbone.View.extend({
       el: "body"
     });
     var view = new ViewClass;
-    equal(view.el, document.body);
+    strictEqual(view.el, document.body);
 
     ViewClass = Backbone.View.extend({
-      el: "body > h2"
+      el: "#testElement > h1"
     });
     view = new ViewClass;
-    equal(view.el, $("#qunit-banner").get(0));
+    strictEqual(view.el, $("#testElement > h1").get(0));
 
     ViewClass = Backbone.View.extend({
       el: "#nonexistent"
@@ -127,13 +135,13 @@ $(document).ready(function() {
     ok(!view.el);
   });
 
-  test("View: with attributes", function() {
+  test("View: with attributes", 2, function() {
     var view = new Backbone.View({attributes : {'class': 'one', id: 'two'}});
     equal(view.el.className, 'one');
     equal(view.el.id, 'two');
   });
 
-  test("View: with attributes as a function", function() {
+  test("View: with attributes as a function", 1, function() {
     var viewClass = Backbone.View.extend({
       attributes: function() {
         return {'class': 'dynamic'};
@@ -142,7 +150,7 @@ $(document).ready(function() {
     equal((new viewClass).el.className, 'dynamic');
   });
 
-  test("View: multiple views per element", function() {
+  test("View: multiple views per element", 3, function() {
     var count = 0, ViewClass = Backbone.View.extend({
       el: $("body"),
       events: {
@@ -166,7 +174,7 @@ $(document).ready(function() {
     equal(5, count);
   });
 
-  test("View: custom events, with namespaces", function() {
+  test("View: custom events, with namespaces", 2, function() {
     var count = 0;
     var ViewClass = Backbone.View.extend({
       el: $('body'),
@@ -186,7 +194,7 @@ $(document).ready(function() {
     equal(count, 2);
   });
 
-  test("#1048 - setElement uses provided object.", function() {
+  test("#1048 - setElement uses provided object.", 2, function() {
     var $el = $('body');
     var view = new Backbone.View({el: $el});
     ok(view.$el === $el);
@@ -204,6 +212,19 @@ $(document).ready(function() {
     view.setElement(b);
     a.trigger('click');
     b.trigger('click');
+  });
+
+  test("#1172 - Clone attributes object", 2, function() {
+    var View = Backbone.View.extend({attributes: {foo: 'bar'}});
+    var v1 = new View({id: 'foo'});
+    strictEqual(v1.el.id, 'foo');
+    var v2 = new View();
+    ok(!v2.el.id);
+  });
+
+  test("#1228 - tagName can be provided as a function", 1, function() {
+    var View = Backbone.View.extend({tagName: function(){ return 'p'; }});
+    ok(new View().$el.is('p'));
   });
 
 });
