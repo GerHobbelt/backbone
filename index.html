@@ -387,6 +387,7 @@
       <li>– <a href="#View-dollar">$ (jQuery or Zepto)</a></li>
       <li>– <a href="#View-render">render</a></li>
       <li>– <a href="#View-remove">remove</a></li>
+      <li>– <a href="#View-dispose">dispose</a></li>
       <li>– <a href="#View-make">make</a></li>
       <li>– <a href="#View-delegateEvents">delegateEvents</a></li>
       <li>– <a href="#View-undelegateEvents">undelegateEvents</a></li>
@@ -961,6 +962,11 @@ alert("Cake id: " + cake.id);
       instead.
     </p>
 
+    <p class="warning">
+      Due to the fact that <a href="#Events">Events</a> accepts space separated
+      lists of events, attribute names should not include spaces.
+    </p>
+
     <p id="Model-changed">
       <b class="header">changed</b><code>model.changed</code>
       <br />
@@ -1215,10 +1221,11 @@ account.set({access: "unlimited"}, {
     <p id="Model-urlRoot">
       <b class="header">urlRoot</b><code>model.urlRoot or model.urlRoot()</code>
       <br />
-      Specify a <tt>urlRoot</tt> if you're using a model outside of a collection,
+      Specify a <tt>urlRoot</tt> if you're using a model <i>outside</i> of a collection,
       to enable the default <a href="#Model-url">url</a> function to generate
       URLs based on the model id. <tt>"/[urlRoot]/id"</tt><br />
-      Note that <tt>urlRoot</tt> may also be defined as a function.
+      Normally, you won't need to define this.
+      Note that <tt>urlRoot</tt> may also be a function.
     </p>
 
 <pre class="runnable">
@@ -1435,7 +1442,7 @@ alert(JSON.stringify(collection));
 
     <ul class="small">
       <li><a href="http://underscorejs.org/#each">forEach (each)</a></li>
-      <li><a href="http://underscorejs.org/#map">map</a></li>
+      <li><a href="http://underscorejs.org/#map">map (collect)</a></li>
       <li><a href="http://underscorejs.org/#reduce">reduce (foldl, inject)</a></li>
       <li><a href="http://underscorejs.org/#reduceRight">reduceRight (foldr)</a></li>
       <li><a href="http://underscorejs.org/#find">find (detect)</a></li>
@@ -1443,7 +1450,7 @@ alert(JSON.stringify(collection));
       <li><a href="http://underscorejs.org/#reject">reject</a></li>
       <li><a href="http://underscorejs.org/#all">every (all)</a></li>
       <li><a href="http://underscorejs.org/#any">some (any)</a></li>
-      <li><a href="http://underscorejs.org/#include">include</a></li>
+      <li><a href="http://underscorejs.org/#include">include (contains)</a></li>
       <li><a href="http://underscorejs.org/#invoke">invoke</a></li>
       <li><a href="http://underscorejs.org/#max">max</a></li>
       <li><a href="http://underscorejs.org/#min">min</a></li>
@@ -1453,9 +1460,9 @@ alert(JSON.stringify(collection));
       <li><a href="http://underscorejs.org/#shuffle">shuffle</a></li>
       <li><a href="http://underscorejs.org/#toArray">toArray</a></li>
       <li><a href="http://underscorejs.org/#size">size</a></li>
-      <li><a href="http://underscorejs.org/#first">first</a></li>
+      <li><a href="http://underscorejs.org/#first">first (head, take)</a></li>
       <li><a href="http://underscorejs.org/#initial">initial</a></li>
-      <li><a href="http://underscorejs.org/#rest">rest</a></li>
+      <li><a href="http://underscorejs.org/#rest">rest (tail)</a></li>
       <li><a href="http://underscorejs.org/#last">last</a></li>
       <li><a href="http://underscorejs.org/#without">without</a></li>
       <li><a href="http://underscorejs.org/#indexOf">indexOf</a></li>
@@ -2339,8 +2346,8 @@ var Bookmark = Backbone.View.extend({
       <a href="http://github.com/sstephenson/eco">Eco</a> are all fine alternatives.
       Because <a href="http://underscorejs.org/">Underscore.js</a> is already on the page,
       <a href="http://underscorejs.org/#template">_.template</a>
-      is available, and is an excellent choice if you've already XSS-sanitized
-      your interpolated data.
+      is available, and is an excellent choice if you prefer simple
+      interpolated-JavaScript style templates.
     </p>
 
     <p>
@@ -2354,8 +2361,15 @@ var Bookmark = Backbone.View.extend({
     <p id="View-remove">
       <b class="header">remove</b><code>view.remove()</code>
       <br />
-      Convenience function for removing the view from the DOM. Equivalent to calling
-      <tt>view.$el.remove();</tt>
+      <a href="#View-dispose">Dispose</a> of the view before removing it from
+      the DOM via <tt>view.$el.remove()</tt>.
+    </p>
+
+    <p id="View-dispose">
+      <b class="header">dispose</b><code>view.dispose()</code>
+      <br />
+      Clean up any references to the view in order to prevent unwanted latent
+      effects and memory leaks.
     </p>
 
     <p id="View-make">
@@ -2575,18 +2589,18 @@ var model = localBackbone.Model.extend(...);
         <img width="550" height="416" data-original="docs/images/flow.png" alt="Flow" class="example_image" />
       </a>
     </div>
-    
-    
+
+
   	<h2 id="examples-wordpress">WordPress.com</h2>
 
   	<p>
-  		<a href="http://wordpress.com/">WordPress.com</a> is the software-as-a-service 
-  		version of <a href="http://wordpress.org">WordPress</a>. It uses Backbone.js 
-  		Models, Collections, and Views in its 
+  		<a href="http://wordpress.com/">WordPress.com</a> is the software-as-a-service
+  		version of <a href="http://wordpress.org">WordPress</a>. It uses Backbone.js
+  		Models, Collections, and Views in its
   		<a href="http://en.blog.wordpress.com/2012/05/25/notifications-refreshed/">Notifications system</a>.  Backbone.js was selected
-  		because it was easy to fit into the structure of the application, not the 
-  		other way around. <a href="http://automattic.com">Automattic</a> 
-  		(the company behind WordPress.com) is integrating Backbone.js into the 
+  		because it was easy to fit into the structure of the application, not the
+  		other way around. <a href="http://automattic.com">Automattic</a>
+  		(the company behind WordPress.com) is integrating Backbone.js into the
   		Stats tab and other features throughout the homepage.
   	</p>
 
