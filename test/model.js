@@ -55,6 +55,17 @@ $(document).ready(function() {
     equal(model.get('value'), 2);
   });
 
+  test("parse can return null", 1, function() {
+    var Model = Backbone.Model.extend({
+      parse: function(obj) {
+        obj.value += 1;
+        return null;
+      }
+    });
+    var model = new Model({value: 1}, {parse: true});
+    equal(JSON.stringify(model.toJSON()), "{}");
+  });
+
   test("url", 3, function() {
     doc.urlRoot = null;
     equal(doc.url(), '/collection/1-the-tempest');
@@ -88,7 +99,7 @@ $(document).ready(function() {
     equal(model.url(), '/nested/1/collection/2');
   });
 
-  test("clone", 8, function() {
+  test("clone", 10, function() {
     var a = new Backbone.Model({ 'foo': 1, 'bar': 2, 'baz': 3});
     var b = a.clone();
     equal(a.get('foo'), 1);
@@ -100,6 +111,12 @@ $(document).ready(function() {
     a.set({foo : 100});
     equal(a.get('foo'), 100);
     equal(b.get('foo'), 1, "Changing a parent attribute does not change the clone.");
+
+    var foo = new Backbone.Model({p: 1});
+    var bar = new Backbone.Model({p: 2});
+    bar.set(foo.clone(), {unset: true});
+    equal(foo.get('p'), 1);
+    equal(bar.get('p'), undefined);
   });
 
   test("isNew", 6, function() {
@@ -334,7 +351,7 @@ $(document).ready(function() {
     equal(lastError, "Can't change admin status.");
   });
 
-  test("isValid", 5, function() {
+  test("isValid", function() {
     var model = new Backbone.Model({valid: true});
     model.validate = function(attrs) {
       if (!attrs.valid) return "invalid";
@@ -342,8 +359,7 @@ $(document).ready(function() {
     equal(model.isValid(), true);
     equal(model.set({valid: false}), false);
     equal(model.isValid(), true);
-    ok(model.set('valid', false, {silent: true}));
-    equal(model.isValid(), false);
+    ok(!model.set('valid', false, {silent: true}));
   });
 
   test("save", 2, function() {
@@ -385,7 +401,7 @@ $(document).ready(function() {
     ok(true, "non-persisted model should not call sync");
   });
 
-  test("validate", 7, function() {
+  test("validate", function() {
     var lastError;
     var model = new Backbone.Model();
     model.validate = function(attrs) {
@@ -398,8 +414,6 @@ $(document).ready(function() {
     equal(result, model);
     equal(model.get('a'), 100);
     equal(lastError, undefined);
-    result = model.set({admin: true}, {silent: true});
-    equal(model.get('admin'), true);
     result = model.set({a: 200, admin: false});
     equal(lastError, "Can't change admin status.");
     equal(result, false);
@@ -622,7 +636,7 @@ $(document).ready(function() {
     equal(model.get('x'), 3);
   });
 
-  test("save with wait validates attributes", 1, function() {
+  test("save with wait validates attributes", function() {
     var model = new Backbone.Model();
     model.url = '/test';
     model.validate = function() { ok(true); };
@@ -740,9 +754,9 @@ $(document).ready(function() {
       model.set({b: 2}, {silent: true});
     });
     model.set({b: 0});
-    deepEqual(changes, [0, 1, 1]);
+    deepEqual(changes, [0, 1]);
     model.change();
-    deepEqual(changes, [0, 1, 1, 2, 1]);
+    deepEqual(changes, [0, 1, 2, 1]);
   });
 
   test("nested set multiple times", 1, function() {
@@ -814,6 +828,90 @@ $(document).ready(function() {
     model.validate = function(){ return 'invalid'; };
     model.sync = function(){ ok(false); };
     strictEqual(model.save(), false);
+  });
+
+  test("#1377 - Save without attrs triggers 'error'.", 1, function() {
+    var Model = Backbone.Model.extend({
+      url: '/test/',
+      sync: function(method, model, options){ options.success(); },
+      validate: function(){ return 'invalid'; }
+    });
+    var model = new Model({id: 1});
+    model.on('error', function(){ ok(true); });
+    model.save();
+  });
+
+  test("#1545 - `undefined` can be passed to a model constructor without coersion", function() {
+    var Model = Backbone.Model.extend({
+      defaults: { one: 1 },
+      initialize : function(attrs, opts) {
+        equal(attrs, undefined);
+      }
+    });
+    var emptyattrs = new Model();
+    var undefinedattrs = new Model(undefined);
+  });
+
+  asyncTest("#1478 - Model `save` does not trigger change on unchanged attributes", 0, function() {
+    var Model = Backbone.Model.extend({
+      sync: function(method, model, options) {
+        setTimeout(function(){
+          options.success();
+          start();
+        }, 0);
+      }
+    });
+    new Model({x: true})
+    .on('change:x', function(){ ok(false); })
+    .save(null, {wait: true});
+  });
+
+  test("#1664 - Changing from one value, silently to another, back to original does not trigger change.", 0, function() {
+    var model = new Backbone.Model({x:1});
+    model.on('change:x', function() { ok(false); });
+    model.set({x:2},{silent:true});
+    model.set({x:3},{silent:true});
+    model.set({x:1});
+  });
+
+  test("#1664 - multiple silent changes nested inside a change event", 2, function() {
+    var changes = [];
+    var model = new Backbone.Model();
+    model.on('change', function() {
+      model.set({a:'c'}, {silent:true});
+      model.set({b:2}, {silent:true});
+      model.unset('c', {silent:true});
+      model.set({a:'a'}, {silent:true});
+      model.set({b:1}, {silent:true});
+      model.set({c:'item'}, {silent:true});
+    });
+    model.on('change:a change:b change:c', function(model, val) { changes.push(val); });
+    model.set({a:'a', b:1, c:'item'});
+    deepEqual(changes, ['a',1,'item']);
+    model.change();
+    deepEqual(changes, ['a',1,'item']);
+  });
+
+  test("#1791 - `attributes` is available for `parse`", function() {
+    var Model = Backbone.Model.extend({
+      parse: function() { this.has('a'); } // shouldn't throw an error
+    });
+    var model = new Model(null, {parse: true});
+    expect(0);
+  });
+
+  test("silent changes in last `change` event back to original does not trigger change", 2, function() {
+    var changes = [];
+    var model = new Backbone.Model();
+    model.on('change:a change:b change:c', function(model, val) { changes.push(val); });
+    model.on('change', function() {
+      model.set({a:'c'}, {silent:true});
+    });
+    model.set({a:'a'});
+    deepEqual(changes, ['a']);
+    model.set({a:'a'}, {silent:true});
+    model.change();
+    deepEqual(changes, ['a']);
   });
 
 });

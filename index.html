@@ -20,6 +20,7 @@
     div#sidebar {
       background: #fff;
       position: fixed;
+      z-index: 10;
       top: 0; left: 0; bottom: 0;
       width: 200px;
       overflow-y: auto;
@@ -207,6 +208,25 @@
           margin: 20px;
           box-shadow: 0 8px 15px rgba(0,0,0,0.4);
         }
+    @media only screen and (-webkit-max-device-pixel-ratio: 1) and (max-width: 600px),
+           only screen and (max--moz-device-pixel-ratio: 1) and (max-width: 600px) {
+      div#sidebar {
+        display: none;
+      }
+      img#logo {
+        max-width: 450px;
+        width: 100%;
+        height: auto;
+      }
+      div.container {
+        width: auto;
+        margin-left: 15px;
+        margin-right: 15px;
+      }
+        p, div.container ul {
+          width: auto;
+        }
+    }
     @media only screen and (-webkit-min-device-pixel-ratio: 1.5) and (max-width: 640px),
           only screen and (-o-min-device-pixel-ratio: 3/2) and (max-width: 640px),
           only screen and (min-device-pixel-ratio: 1.5) and (max-width: 640px) {
@@ -284,6 +304,7 @@
       <li>– <a href="#Events-on">on</a></li>
       <li>– <a href="#Events-off">off</a></li>
       <li>– <a href="#Events-trigger">trigger</a></li>
+      <li>- <a href="#Events-catalog"><b>Catalog of Built-in Events</b></a></li>
     </ul>
 
     <a class="toc_title" href="#Model">
@@ -538,13 +559,19 @@
       </tr>
       <tr>
         <td><a class="punch" href="https://raw.github.com/documentcloud/backbone/master/backbone.js">Edge Version (master)</a></td>
-        <td><i>Unreleased, use at your own risk</i></td>
+        <td>
+          <i>Unreleased, use at your own risk</i>
+          <a href="https://travis-ci.org/documentcloud/backbone">
+            <img width="89" height="13" src="https://travis-ci.org/documentcloud/backbone.png" />
+          </a>
+        </td>
       </tr>
     </table>
 
     <p>
-      Backbone's only hard dependency is
-      <a href="http://underscorejs.org/">Underscore.js</a> <small>( > 1.3.1)</small>.
+      Backbone's only hard dependency is either
+      <a href="http://underscorejs.org/">Underscore.js</a> <small>( > 1.3.3)</small> or
+      <a href="http://lodash.com">Lo-Dash</a>.
       For RESTful persistence, history support via <a href="#Router">Backbone.Router</a>
       and DOM manipulation with <a href="#View">Backbone.View</a>, include
       <a href="https://github.com/douglascrockford/JSON-js">json2.js</a>, and either
@@ -715,6 +742,11 @@ object.off(null, null, context);
 object.off();
 </pre>
 
+    <p>
+      Note that calling <tt>model.off()</tt>, for example, will indeed remove <i>all</i> events
+      on the model &mdash; including events that Backbone uses for internal bookkeeping.
+    </p>
+
     <p id="Events-trigger">
       <b class="header">trigger</b><code>object.trigger(event, [*args])</code>
       <br />
@@ -722,6 +754,27 @@ object.off();
       Subsequent arguments to <b>trigger</b> will be passed along to the
       event callbacks.
     </p>
+
+    <p id="Events-catalog">
+      <b class="header">Catalog of Events</b>
+      <br />
+      Here's the complete list of built-in Backbone events, with arguments.
+      You're also free to trigger your own events on Models, Collections and
+      Views as you see fit.
+    </p>
+
+    <ul class="small">
+      <li><b>"add"</b> (model, collection, options) &mdash; when a model is added to a collection. </li>
+      <li><b>"remove"</b> (model, collection, options) &mdash; when a model is removed from a collection. </li>
+      <li><b>"reset"</b> (collection, options) &mdash; when the collection's entire contents have been replaced. </li>
+      <li><b>"change"</b> (model, options) &mdash; when a model's attributes have changed. </li>
+      <li><b>"change:[attribute]"</b> (model, value, options) &mdash; when a specific attribute has been updated. </li>
+      <li><b>"destroy"</b> (model, collection, options) &mdash; when a model is <a href="#Model-destroy">destroyed</a>. </li>
+      <li><b>"sync"</b> (model, resp, options) &mdash; triggers whenever a model has been successfully synced to the server. </li>
+      <li><b>"error"</b> (model, collection) &mdash; when a model's validation fails, or a <a href="#Model-save">save</a> call fails on the server. </li>
+      <li><b>"route:[name]"</b> (router) &mdash; when one of a router's routes has matched. </li>
+      <li><b>"all"</b> &mdash; this special event fires for <i>any</i> triggered event, passing the event name as the first argument. </li>
+    </ul>
 
     <h2 id="Model">Backbone.Model</h2>
 
@@ -876,8 +929,15 @@ book.set("title", "A Scandal in Bohemia");
       You may also pass an <tt>error</tt>
       callback in the options, which will be invoked instead of triggering an
       <tt>"error"</tt> event, should validation fail.
-      If <tt>{silent: true}</tt> is passed as an option, the validation is deferred
-      until the next change.
+    </p>
+
+    <p>
+      Passing <tt>{silent: true}</tt> as an option will defer both the validation
+      and the event. This is useful when you want to
+      change attributes provisionally or rapidly, without propagating the change
+      through the rest of the system. That said, <tt>silent</tt> doesn't mean that
+      the change (and event) won't happen, it's merely silenced until the next
+      <a href="#Model-change">change</a>.
     </p>
 
     <p id="Model-escape">
@@ -1407,7 +1467,7 @@ var Library = Backbone.Collection.extend({
       <br />
       When creating a Collection, you may choose to pass in the initial array
       of <b>models</b>.  The collection's <a href="#Collection-comparator">comparator</a>
-      function may be included as an option. Passing <tt>false</tt> as the
+      may be included as an option. Passing <tt>false</tt> as the
       comparator option will prevent sorting. If you define an
       <b>initialize</b> function, it will be invoked when the collection is
       created.
@@ -1536,6 +1596,11 @@ ships.add([
 ]);
 </pre>
 
+    <p class="warning">
+      Note that adding the same model (a model with the same <tt>id</tt>) to
+      a collection more than once <br /> is a no-op.
+    </p>
+
     <p id="Collection-remove">
       <b class="header">remove</b><code>collection.remove(models, [options])</code>
       <br />
@@ -1549,7 +1614,7 @@ ships.add([
     <p id="Collection-get">
       <b class="header">get</b><code>collection.get(id)</code>
       <br />
-      Get a model from a collection, specified by <b>id</b>.
+      Get a model from a collection, specified by an <b>id</b> or a <b>model</b>.
     </p>
 
 <pre>
@@ -1559,10 +1624,8 @@ var book = Library.get(110);
     <p id="Collection-getByCid">
       <b class="header">getByCid</b><code>collection.getByCid(cid)</code>
       <br />
-      Get a model from a collection, specified by client id. The client id
-      is the <tt>.cid</tt> property of the model, automatically assigned whenever
-      a model is created. Useful for models which have not yet been saved to
-      the server, and do not yet have true ids.
+      Get a model from a collection, specified by a
+      <a href="#Model-cid"><b>cid</b></a> or a <b>model</b>.
     </p>
 
     <p id="Collection-at">
@@ -1611,16 +1674,17 @@ var book = Library.get(110);
     <p id="Collection-comparator">
       <b class="header">comparator</b><code>collection.comparator</code>
       <br />
-      By default there is no <b>comparator</b> function on a collection.
+      By default there is no <b>comparator</b> for a collection.
       If you define a comparator, it will be used to maintain
       the collection in sorted order. This means that as models are added,
       they are inserted at the correct index in <tt>collection.models</tt>.
-      Comparator function can be defined as either a
+      A comparator can be defined as a
       <a href="http://underscorejs.org/#sortBy">sortBy</a>
       (pass a function that takes a single argument),
-      or as a
+      as a
       <a href="https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/sort">sort</a>
-      (pass a comparator function that expects two arguments).
+      (pass a comparator function that expects two arguments),
+      or as a string indicating the attribute to sort by.
     </p>
 
     <p>
@@ -1652,16 +1716,16 @@ alert(chapters.pluck('title'));
 </pre>
 
     <p class="warning">
-      Collections with comparator functions will not automatically re-sort if you
-      later change model attributes, so you may wish to call <tt>sort</tt> after
-      changing model attributes that would affect the order.
+      Collections with a comparator will not automatically re-sort if you
+      later change model attributes, so you may wish to call
+      <tt>sort</tt> after changing model attributes that would affect the order.
     </p>
 
     <p id="Collection-sort">
       <b class="header">sort</b><code>collection.sort([options])</code>
       <br />
       Force a collection to re-sort itself. You don't need to call this under
-      normal circumstances, as a collection with a <a href="#Collection-comparator">comparator</a> function
+      normal circumstances, as a collection with a <a href="#Collection-comparator">comparator</a>
       will sort itself whenever a model is added. Calling <b>sort</b>
       triggers the collection's <tt>"reset"</tt> event, unless silenced by passing
       <tt>{silent: true}</tt>
@@ -1807,19 +1871,18 @@ Accounts.fetch();
     </p>
 
     <p id="Collection-reset">
-      <b class="header">reset</b><code>collection.reset(models, [options])</code>
+      <b class="header">reset</b><code>collection.reset([models], [options])</code>
       <br />
       Adding and removing models one at a time is all well and good, but sometimes
       you have so many models to change that you'd rather just update the collection
       in bulk. Use <b>reset</b> to replace a collection with a new list
       of models (or attribute hashes), triggering a single <tt>"reset"</tt> event
       at the end. Pass <tt>{silent: true}</tt> to suppress the <tt>"reset"</tt> event.
-      Using reset with no arguments is useful as a way to empty the collection.
     </p>
 
     <p>
       Here's an example using <b>reset</b> to bootstrap a collection during initial page load,
-      in a Rails application.
+      in a Rails application:
     </p>
 
 <pre>
@@ -1924,15 +1987,27 @@ var Workspace = Backbone.Router.extend({
       similar to the <a href="#View">View</a>'s <a href="#View-delegateEvents">events hash</a>.
       Routes can contain parameter parts, <tt>:param</tt>, which match a single URL
       component between slashes; and splat parts <tt>*splat</tt>, which can match
-      any number of URL components.
+      any number of URL components. Part of a route can be made optional by
+      surrounding it in parentheses <tt>(/:optional)</tt>.
     </p>
 
     <p>
       For example, a route of <tt>"search/:query/p:page"</tt> will match
       a fragment of <tt>#search/obama/p2</tt>, passing <tt>"obama"</tt>
-      and <tt>"2"</tt> to the action. A route of <tt>"file/*path"</tt> will
-      match <tt>#file/nested/folder/file.txt</tt>,
-      passing <tt>"nested/folder/file.txt"</tt> to the action.
+      and <tt>"2"</tt> to the action.
+    </p>
+
+    <p>
+      A route of <tt>"file/*path"</tt> will match
+      <tt>#file/nested/folder/file.txt</tt>, passing
+      <tt>"nested/folder/file.txt"</tt> to the action.
+    </p>
+
+    <p>
+      A route of <tt>"docs/:section(/:subsection)"</tt> will match
+      <tt>#docs/faq</tt> and <tt>#docs/faq/installing</tt>, passing
+      <tt>"faq"</tt> to the action in the first case, and passing <tt>"faq"</tt>
+      and <tt>"installing"</tt> to the action in the second.
     </p>
 
     <p>
@@ -2055,6 +2130,9 @@ app.navigate("help/troubleshooting", {trigger: true, replace: true});
     <p>
       To indicate that you'd like to use HTML5 <tt>pushState</tt> support in
       your application, use <tt>Backbone.history.start({pushState: true})</tt>.
+      If you'd like to use <tt>pushState</tt>, but have browsers that don't support
+      it natively use full page refreshes instead, you can add
+      <tt>{hashChange: false}</tt> to the options.
     </p>
 
     <p>
@@ -2241,8 +2319,10 @@ var DocumentRow = Backbone.View.extend({
     <p id="View-constructor">
       <b class="header">constructor / initialize</b><code>new View([options])</code>
       <br />
-      When creating a new View, the options you pass are attached to the view
-      as <tt>this.options</tt>, for future reference. There are several special
+      When creating a new View, the options you pass &mdash; after being merged
+      into any default options already present on the view &mdash;
+      are attached to the view as <tt>this.options</tt> for future reference.
+      There are several special
       options that, if passed, will be attached directly to the view:
       <tt>model</tt>, <tt>collection</tt>,
       <tt>el</tt>, <tt>id</tt>, <tt>className</tt>, <tt>tagName</tt> and <tt>attributes</tt>.
@@ -3309,9 +3389,6 @@ var model = localBackbone.Model.extend(...);
     <div style="text-align: center;">
       <a href="http://trello.com">
         <img width="550" height="416" data-original="docs/images/trello.png" alt="Trello" class="example_image" />
-      </a>
-    </div>
-
     <h2 id="examples-tzigla">Tzigla</h2>
 
     <p>
@@ -3339,7 +3416,7 @@ var model = localBackbone.Model.extend(...);
 
     <h2 id="faq">F.A.Q.</h2>
 
-    <p id="FAQ-events">
+   <p id="FAQ-events">
       <b class="header">Catalog of Events</b>
       <br />
       Here's a list of all of the built-in events that Backbone.js can fire.
@@ -3360,7 +3437,7 @@ var model = localBackbone.Model.extend(...);
       <li><b>"all"</b> &mdash; this special event fires for <i>any</i> triggered event, passing the event name as the first argument. </li>
     </ul>
 
-    <p id="FAQ-why-backbone">
+     <p id="FAQ-why-backbone">
       <b class="header">Why use Backbone, not [other framework X]?</b>
       <br />
       If your eye hasn't already been caught by the adaptibility and elan on display
@@ -3425,10 +3502,8 @@ var model = localBackbone.Model.extend(...);
       <li>
         There's no built-in performance penalty for choosing to structure your
         code with Backbone. And if you do want to optimize further, thin models and
-        templates with flexible granularity make it easy squeeze every last
-        drop of potential performance out of, say, IE8.
-      </li>
     </ul>
+
 
     <p id="FAQ-tim-toady">
       <b class="header">There's More Than One Way To Do It</b>
