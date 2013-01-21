@@ -66,6 +66,61 @@ $(document).ready(function() {
     equal(obj.counter, 5);
   });
 
+  test("listenTo and stopListening", 1, function() {
+    var a = _.extend({}, Backbone.Events);
+    var b = _.extend({}, Backbone.Events);
+    a.listenTo(b, 'all', function(){ ok(true); });
+    b.trigger('anything');
+    a.listenTo(b, 'all', function(){ ok(false); });
+    a.stopListening();
+    b.trigger('anything');
+  });
+
+  test("listenTo and stopListening with event maps", 4, function() {
+    var a = _.extend({}, Backbone.Events);
+    var b = _.extend({}, Backbone.Events);
+    var cb = function(){ ok(true); };
+    a.listenTo(b, {event: cb});
+    b.trigger('event');
+    a.listenTo(b, {event2: cb});
+    b.on('event2', cb);
+    a.stopListening(b, {event2: cb});
+    b.trigger('event event2');
+    a.stopListening();
+    b.trigger('event event2');
+  });
+
+  test("stopListening with omitted args", 2, function () {
+    var a = _.extend({}, Backbone.Events);
+    var b = _.extend({}, Backbone.Events);
+    var cb = function () { ok(true); };
+    a.listenTo(b, 'event', cb);
+    b.on('event', cb);
+    a.listenTo(b, 'event2', cb);
+    a.stopListening(null, {event: cb});
+    b.trigger('event event2');
+  });
+
+  test("listenTo yourself", 1, function(){
+    var e = _.extend({}, Backbone.Events);
+    e.listenTo(e, "foo", function(){ ok(true); });
+    e.trigger("foo");
+  });
+
+  test("listenTo yourself cleans yourself up with stopListening", 1, function(){
+    var e = _.extend({}, Backbone.Events);
+    e.listenTo(e, "foo", function(){ ok(true); });
+    e.trigger("foo");
+    e.stopListening();
+    e.trigger("foo");
+  });
+
+  test("listenTo with empty callback doesn't throw an error", 1, function(){
+    var e = _.extend({}, Backbone.Events);
+    e.listenTo(e, "foo", null);
+    e.trigger("foo");
+    ok(true);
+  });
 
   test("trigger all for each event", 3, function() {
     var a, b, obj = { counter: 0 };
@@ -227,13 +282,11 @@ $(document).ready(function() {
   test("once", 2, function() {
     // Same as the previous test, but we use once rather than having to explicitly unbind
     var obj = { counterA: 0, counterB: 0 };
-    _.extend(obj,Backbone.Events);
+    _.extend(obj, Backbone.Events);
     var incrA = function(){ obj.counterA += 1; obj.trigger('event'); };
-    var incrB = function(){ obj.counterB += 1 };
+    var incrB = function(){ obj.counterB += 1; };
     obj.once('event', incrA);
     obj.once('event', incrB);
-    obj.trigger('event');
-    obj.trigger('event');
     obj.trigger('event');
     equal(obj.counterA, 1, 'counterA should have only been incremented once.');
     equal(obj.counterB, 1, 'counterB should have only been incremented once.');
@@ -296,6 +349,55 @@ $(document).ready(function() {
 
     obj.trigger('a b c');
     equal(obj.counter, 3);
+  });
+
+  test("once with off only by context", 0, function() {
+    var context = {};
+    var obj = _.extend({}, Backbone.Events);
+    obj.once('event', function(){ ok(false); }, context);
+    obj.off(null, null, context);
+    obj.trigger('event');
+  });
+
+  test("Backbone object inherits Events", function() {
+    ok(Backbone.on === Backbone.Events.on);
+  });
+
+  asyncTest("once with asynchronous events", 1, function() {
+    var func = _.debounce(function() { ok(true); start(); }, 50);
+    var obj = _.extend({}, Backbone.Events).once('async', func);
+
+    obj.trigger('async');
+    obj.trigger('async');
+  });
+
+  test("once with multiple events.", 2, function() {
+    var obj = _.extend({}, Backbone.Events);
+    obj.once('x y', function() { ok(true); });
+    obj.trigger('x y');
+  });
+
+  test("Off during iteration with once.", 2, function() {
+    var obj = _.extend({}, Backbone.Events);
+    var f = function(){ this.off('event', f); };
+    obj.on('event', f);
+    obj.once('event', function(){});
+    obj.on('event', function(){ ok(true); });
+
+    obj.trigger('event');
+    obj.trigger('event');
+  });
+
+  test("`once` on `all` should work as expected", 1, function() {
+    Backbone.once('all', function() {
+      ok(true);
+      Backbone.trigger('all');
+    });
+    Backbone.trigger('all');
+  });
+
+  test("once without a callback is a noop", 0, function() {
+    _.extend({}, Backbone.Events).once('event').trigger('event');
   });
 
 });
