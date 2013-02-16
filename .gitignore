@@ -2,3 +2,7 @@ raw
 *.sw?
 .DS_Store
 node_modules
+
+# Editor backup files
+*~
+*.bak
