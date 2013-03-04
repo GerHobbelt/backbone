@@ -72,18 +72,25 @@
   // in terms of the existing API.
   var eventsApi = function(obj, action, name, rest) {
     if (!name) return true;
+
+    // Handle event maps.
     if (typeof name === 'object') {
       for (var key in name) {
         obj[action].apply(obj, [key, name[key]].concat(rest));
       }
-    } else if (eventSplitter.test(name)) {
+      return false;
+    }
+
+    // Handle space separated event names.
+    if (eventSplitter.test(name)) {
       var names = name.split(eventSplitter);
       for (var i = 0, l = names.length; i < l; i++) {
         obj[action].apply(obj, [names[i]].concat(rest));
       }
-    } else {
-      return true;
+      return false;
     }
+
+    return true;
   };
 
   // Optimized internal dispatch function for triggering events. Tries to
@@ -295,7 +302,7 @@
     // Set a hash of model attributes on the object, firing `"change"` unless
     // you choose to silence it.
     set: function(key, val, options) {
-      var attr, attrs, unset, changes, silent, changing, prev, current;
+      var attr, attrs, unset, changes, changing, prev, current;
       if (key == null) return this;
 
       // Handle both `"key", value` and `{key: value}` -style arguments.
@@ -313,7 +320,6 @@
 
       // Extract attributes and options.
       unset           = options.unset;
-      silent          = options.silent;
       changes         = [];
       changing        = this._changing;
       this._changing  = true;
@@ -340,19 +346,15 @@
       }
 
       // Trigger all relevant attribute changes.
-      if (!silent) {
-        if (changes.length) this._pending = true;
-        for (var i = 0, l = changes.length; i < l; i++) {
-          this.trigger('change:' + changes[i], this, current[changes[i]], options);
-        }
+      if (changes.length) this._pending = true;
+      for (var i = 0, l = changes.length; i < l; i++) {
+        this.trigger('change:' + changes[i], this, current[changes[i]], options);
       }
 
       if (changing) return this;
-      if (!silent) {
-        while (this._pending) {
-          this._pending = false;
-          this.trigger('change', this, options);
-        }
+      while (this._pending) {
+        this._pending = false;
+        this.trigger('change', this, options);
       }
       this._pending = false;
       this._changing = false;
@@ -413,7 +415,7 @@
     // ---------------------------------------------------------------------
 
     // Fetch the model from the server. If the server's representation of the
-    // model differs from its current attributes, they will be overriden,
+    // model differs from its current attributes, they will be overridden,
     // triggering a `"change"` event.
     fetch: function(options) {
       options = options ? _.clone(options) : {};
