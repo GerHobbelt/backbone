@@ -3,3 +3,4 @@ Rakefile
 docs/
 raw/
 examples/
+.jshintrc
