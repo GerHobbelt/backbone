@@ -494,6 +494,7 @@
       F.A.Q.
     </a>
     <ul class="toc_section">
+      <li>– <a href="#FAQ-events">Catalog of Events</a></li>
       <li>– <a href="#FAQ-why-backbone">Why Backbone?</a></li>
       <li>– <a href="#FAQ-tim-toady">More Than One Way To Do It</a></li>
       <li>– <a href="#FAQ-nested">Nested Models &amp; Collections</a></li>
@@ -1585,7 +1586,7 @@ var Library = Backbone.Collection.extend({
 
     <p>
       A collection can also contain polymorphic models by overriding this property
-      with a constructor that returns a model.
+      with a function that returns a model.
     </p>
 
 <pre>
@@ -3559,7 +3560,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://blossom.io">
-        <img width="550" height="367" data-original="docs/images/blossom.png" alt="Blossom" class="example_image" />
+        <img width="550" height="360" data-original="docs/images/blossom.png" alt="Blossom" class="example_image" />
       </a>
     </div>
 
@@ -3606,6 +3607,27 @@ var model = localBackbone.Model.extend(...);
     </div>
 
     <h2 id="faq">F.A.Q.</h2>
+
+   <p id="FAQ-events">
+      <b class="header">Catalog of Events</b>
+      <br />
+      Here's a list of all of the built-in events that Backbone.js can fire.
+      You're also free to trigger your own events on Models and Views as you
+      see fit.
+    </p>
+
+    <ul class="small">
+      <li><b>"add"</b> (model, collection, options) &mdash; when a model is added to a collection. </li>
+      <li><b>"remove"</b> (model, collection, options) &mdash; when a model is removed from a collection. </li>
+      <li><b>"reset"</b> (collection, options) &mdash; when the collection's entire contents have been replaced. </li>
+      <li><b>"change"</b> (model, options) &mdash; when a model's attributes have changed. </li>
+      <li><b>"change:[attribute]"</b> (model, value, options) &mdash; when a specific attribute has been updated. </li>
+      <li><b>"destroy"</b> (model, collection, options) &mdash; when a model is <a href="#Model-destroy">destroyed</a>. </li>
+      <li><b>"sync"</b> (model, resp, options) &mdash; triggers whenever a model has been successfully synced to the server. </li>
+      <li><b>"error"</b> (model, collection) &mdash; when a model's validation fails, or a <a href="#Model-save">save</a> call fails on the server. </li>
+      <li><b>"route:[name]"</b> (router) &mdash; when one of a router's routes has matched. </li>
+      <li><b>"all"</b> &mdash; this special event fires for <i>any</i> triggered event, passing the event name as the first argument. </li>
+    </ul>
 
     <p id="FAQ-why-backbone">
       <b class="header">Why use Backbone, not [other framework X]?</b>
