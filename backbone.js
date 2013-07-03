@@ -1454,13 +1454,12 @@
     // returns `false`.
     loadUrl: function(fragmentOverride) {
       var fragment = this.fragment = this.getFragment(fragmentOverride);
-      var matched = _.any(this.handlers, function(handler) {
+      return _.any(this.handlers, function(handler) {
         if (handler.route.test(fragment)) {
           handler.callback(fragment);
           return true;
         }
       });
-      return matched;
     },
 
     // Save a fragment into the hash history, or replace the URL state if the
@@ -1472,7 +1471,7 @@
     // you wish to modify the current URL without adding an entry to the history.
     navigate: function(fragment, options) {
       if (!History.started) return false;
-      if (!options || options === true) options = {trigger: options};
+      if (!options || options === true) options = {trigger: !!options};
       fragment = this.getFragment(fragment || '');
       if (this.fragment === fragment) return;
       this.fragment = fragment;
