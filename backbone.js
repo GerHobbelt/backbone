@@ -1011,7 +1011,7 @@
     tagName: 'div',
 
     // jQuery delegate for element lookup, scoped to DOM elements within the
-    // current view. This should be prefered to global lookups where possible.
+    // current view. This should be preferred to global lookups where possible.
     $: function(selector) {
       return this.$el.find(selector);
     },
@@ -1051,7 +1051,7 @@
     //
     //     {
     //       'mousedown .title':  'edit',
-    //       'click .button':     'save'
+    //       'click .button':     'save',
     //       'click .open':       function(e) { ... }
     //     }
     //
@@ -1276,7 +1276,7 @@
     _routeToRegExp: function(route) {
       route = route.replace(escapeRegExp, '\\$&')
                    .replace(optionalParam, '(?:$1)?')
-                   .replace(namedParam, function(match, optional){
+                   .replace(namedParam, function(match, optional) {
                      return optional ? match : '([^\/]+)';
                    })
                    .replace(splatParam, '(.*?)');
@@ -1350,7 +1350,7 @@
         if (this._hasPushState || !this._wantsHashChange || forcePushState) {
           fragment = this.location.pathname;
           var root = this.root.replace(trailingSlash, '');
-          if (!fragment.indexOf(root)) fragment = fragment.substr(root.length);
+          if (!fragment.indexOf(root)) fragment = fragment.slice(root.length);
         } else {
           fragment = this.getHash();
         }
@@ -1472,10 +1472,15 @@
     navigate: function(fragment, options) {
       if (!History.started) return false;
       if (!options || options === true) options = {trigger: !!options};
+
       fragment = this.getFragment(fragment || '');
       if (this.fragment === fragment) return;
       this.fragment = fragment;
+
       var url = this.root + fragment;
+
+      // Don't include a trailing slash on the root.
+      if (fragment === '' && url !== '/') url = url.slice(0, -1);
 
       // If pushState is available, we use it to set the fragment as a real URL.
       if (this._hasPushState) {
