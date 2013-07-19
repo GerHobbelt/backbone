@@ -11,15 +11,17 @@
   // on the server).
   if (typeof exports === 'object') {
     // CommonJS
-    factory(exports);
+    factory(exports, require('underscore'), require('jquery'));
   } else if (typeof define === 'function' && define.amd) {
     // AMD. Register as a named module.
-    define('backbone', ['exports'], factory);
+    define('backbone', ['exports', 'underscore', 'jquery'], factory);
   } else {
     // Browser globals
-    factory(root);
+    // For Backbone's purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
+    // the `$` variable.
+    factory(root, root._, root.jQuery || root.Zepto || root.ender || root.$);
   }
-} (this, function (root) {
+} (this, function (root, _, $) {
 
   // Initial Setup
   // -------------
@@ -47,12 +49,11 @@
   Backbone.VERSION = '1.0.0';
 
   // Require Underscore, if we're on the server, and it's not already present.
-  var _ = root._;
   if (!_ && (typeof require !== 'undefined')) _ = require('underscore');
 
   // For Backbone's purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
   // the `$` variable.
-  Backbone.$ = root.jQuery || root.Zepto || root.ender || root.$;
+  Backbone.$ = $;
 
   // Runs Backbone.js in *noConflict* mode, returning the `Backbone` variable
   // to its previous owner. Returns a reference to this Backbone object.
@@ -1588,4 +1589,5 @@
     };
   };
 
+  return Backbone;
 }));
