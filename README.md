@@ -17,9 +17,12 @@ For Docs, License, Tests, pre-packed downloads, and everything else, really, see
 http://backbonejs.org
 
 To suggest a feature, report a bug, or general discussion:
-http://github.com/jashkenas/backbone/issues
+http://github.com/documentcloud/backbone/issues
 
-All contributors are listed here:
+Backbone is an open-sourced component of DocumentCloud:
+http://github.com/documentcloud/
+
+Many thanks to our contributors:
 http://github.com/jashkenas/backbone/contributors
 
 Special thanks to Robert Kieffer for the original philosophy behind Backbone.
