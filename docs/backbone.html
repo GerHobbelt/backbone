@@ -80,7 +80,7 @@ on the server).</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    factory(exports);
+            <div class="content"><div class='highlight'><pre>    factory(exports, require(<span class="string">'underscore'</span>), require(<span class="string">'jquery'</span>));
   } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> define === <span class="string">'function'</span> &amp;&amp; define.amd) {</pre></div></div>
             
         </li>
@@ -96,7 +96,7 @@ on the server).</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    define(<span class="string">'backbone'</span>, [<span class="string">'exports'</span>], factory);
+            <div class="content"><div class='highlight'><pre>    define(<span class="string">'backbone'</span>, [<span class="string">'exports'</span>, <span class="string">'underscore'</span>, <span class="string">'jquery'</span>], factory);
   } <span class="keyword">else</span> {</pre></div></div>
             
         </li>
@@ -108,13 +108,15 @@ on the server).</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>Browser globals</p>
+              <p>Browser globals
+For Backbone&#39;s purposes, jQuery, Zepto, Ender, or My Library (kidding) owns
+the <code>$</code> variable.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    factory(root);
+            <div class="content"><div class='highlight'><pre>    factory(root, root._, root.jQuery || root.Zepto || root.ender || root.$);
   }
-} (<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(root)</span> {</span></pre></div></div>
+} (<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> <span class="params">(root, _, $)</span> {</span></pre></div></div>
             
         </li>
         
@@ -224,8 +226,7 @@ be attached to this. Exported for both the browser and the server.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="keyword">var</span> _ = root._;
-  <span class="keyword">if</span> (!_ &amp;&amp; (<span class="keyword">typeof</span> require !== <span class="string">'undefined'</span>)) _ = require(<span class="string">'underscore'</span>);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="keyword">if</span> (!_ &amp;&amp; (<span class="keyword">typeof</span> require !== <span class="string">'undefined'</span>)) _ = require(<span class="string">'underscore'</span>);</pre></div></div>
             
         </li>
         
@@ -241,7 +242,7 @@ the <code>$</code> variable.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  Backbone.$ = root.jQuery || root.Zepto || root.ender || root.$;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  Backbone.$ = $;</pre></div></div>
             
         </li>
         
@@ -4153,6 +4154,7 @@ later.</p>
     };
   };
 
+  <span class="keyword">return</span> Backbone;
 }));</pre></div></div>
             
         </li>
