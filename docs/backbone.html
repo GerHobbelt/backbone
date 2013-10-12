@@ -1502,7 +1502,7 @@ returning <code>true</code> if all is well. Otherwise, fire an <code>&quot;inval
       attrs = _.extend({}, <span class="keyword">this</span>.attributes, attrs);
       <span class="keyword">var</span> error = <span class="keyword">this</span>.validationError = <span class="keyword">this</span>.validate(attrs, options) || <span class="literal">null</span>;
       <span class="keyword">if</span> (!error) <span class="keyword">return</span> <span class="literal">true</span>;
-      <span class="keyword">this</span>.trigger(<span class="string">'invalid'</span>, <span class="keyword">this</span>, error, _.extend(options || {}, {validationError: error}));
+      <span class="keyword">this</span>.trigger(<span class="string">'invalid'</span>, <span class="keyword">this</span>, error, _.extend(options, {validationError: error}));
       <span class="keyword">return</span> <span class="literal">false</span>;
     }
 
