@@ -460,6 +460,7 @@
       <li>– <a href="#examples-foursquare">Foursquare</a></li>
       <li>– <a href="#examples-bitbucket">Bitbucket</a></li>
       <li>– <a href="#examples-disqus">Disqus</a></li>
+      <li>– <a href="#examples-delicious">Delicious</a></li>
       <li>– <a href="#examples-khan-academy">Khan Academy</a></li>
       <li>– <a href="#examples-elife-lens">eLife Lens</a></li>
       <li>– <a href="#examples-do">Do</a></li>
@@ -640,10 +641,10 @@
       to execute them.
     </p>
 
-    <h2 id="upgrading">Upgrading to 1.0</h2>
+    <h2 id="upgrading">Upgrading to 1.1</h2>
 
     <p>
-      Backbone <b>1.0</b> should be a fairly painless upgrade from the <b>0.9</b>
+      Backbone <b>1.1</b> should be a fairly painless upgrade from the <b>0.9.X</b>
       series. If you're upgrading from an older version, be sure to check out the
       <a href="#changelog">change log</a>. In brief, a few of the larger breaking
       changes are:
@@ -676,6 +677,16 @@
         <a href="#Model-set">set</a> unless the <tt>{validate:true}</tt>
         option is passed. Model validation now fires an <tt>"invalid"</tt> event instead of
         <tt>"error"</tt>.
+      </li>
+      <li>
+        In 1.1, Backbone Views no longer have the <tt>options</tt> argument
+        attached as <tt>this.options</tt> automatically. Feel free to continue 
+        attaching it if you like.
+      </li>
+      <li>
+        In 1.1, The <b>Collection</b> methods <tt>add</tt>, <tt>remove</tt>, 
+        <tt>set</tt>, <tt>push</tt>, and <tt>shift</tt> now return the model
+        (or models) added or removed from the collection.
       </li>
     </ul>
 
@@ -853,9 +864,9 @@ view.stopListening(model);
       <li><b>"change"</b> (model, options) &mdash; when a model's attributes have changed. </li>
       <li><b>"change:[attribute]"</b> (model, value, options) &mdash; when a specific attribute has been updated. </li>
       <li><b>"destroy"</b> (model, collection, options) &mdash; when a model is <a href="#Model-destroy">destroyed</a>. </li>
-      <li><b>"request"</b> (model, xhr, options) &mdash; when a model (or collection) has started a request to the server. </li>
-      <li><b>"sync"</b> (model, resp, options) &mdash; when a model (or collection) has been successfully synced with the server. </li>
-      <li><b>"error"</b> (model, xhr, options) &mdash; when a model's <a href="#Model-save">save</a> call fails on the server. </li>
+      <li><b>"request"</b> (model, collection, xhr, options) &mdash; when a model or collection has started a request to the server. </li>
+      <li><b>"sync"</b> (model, collection, resp, options) &mdash; when a model or collection has been successfully synced with the server. </li>
+      <li><b>"error"</b> (model, collection, xhr, options) &mdash; when a model's <a href="#Model-save">save</a> call fails on the server. </li>
       <li><b>"invalid"</b> (model, error, options) &mdash; when a model's <a href="#Model-validate">validation</a> fails on the client. </li>
       <li><b>"route:[name]"</b> (params) &mdash; Fired by the router when a specific route is matched.</li>
       <li><b>"route"</b> (route, params) &mdash; Fired by the router when <i>any</i> route has been matched.</li>
@@ -3076,6 +3087,25 @@ var model = localBackbone.Model.extend(...);
       </a>
     </div>
 
+    <h2 id="examples-delicious">Delicious</h2>
+
+    <p>
+      <a href="https://delicious.com/">Delicious</a> is a social bookmarking 
+      platform making it easy to save, sort, and store bookmarks from across 
+      the web. Delicious uses <a href="http://chaplinjs.org">Chaplin.js</a>, 
+      Backbone.js and AppCache to build a full-featured MVC web app. 
+      The use of Backbone helped the website and 
+      <a href="http://delicious.com/tools">mobile apps</a> share a 
+      single API service, and the reuse of the model tier made it significantly 
+      easier to share code during the recent Delicious redesign.
+    </p>
+
+    <div style="text-align: center;">
+      <a href="http://www.delicious.com">
+        <img width="510" height="321" data-original="docs/images/delicious.jpg" alt="Delicious" class="example_retina" />
+      </a>
+    </div>
+
     <h2 id="examples-khan-academy">Khan Academy</h2>
 
     <p>
@@ -3330,22 +3360,6 @@ var model = localBackbone.Model.extend(...);
     <div style="text-align: center;">
       <a href="http://m.airbnb.com/">
         <img width="500" height="489" data-original="docs/images/airbnb.png" alt="Airbnb" class="example_image" />
-      </a>
-    </div>
-
-    <h2 id="examples-diaspora">Diaspora</h2>
-
-    <p>
-      <a href="http://www.joindiaspora.com/">Diaspora</a> is a distributed social
-      network, formed from a number of independently operated <i>pods</i>.
-      You own your personal data, and control with whom you share.
-      All of Diaspora is <a href="https://github.com/diaspora/diaspora">open-source</a>
-      code, built with <a href="http://rubyonrails.org/">Rails</a> and Backbone.js.
-    </p>
-
-    <div style="text-align: center;">
-      <a href="http://www.joindiaspora.com/">
-        <img width="550" height="394" data-original="docs/images/diaspora.jpg" alt="Diaspora" class="example_retina" />
       </a>
     </div>
 
