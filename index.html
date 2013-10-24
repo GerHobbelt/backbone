@@ -286,7 +286,7 @@
   <div id="sidebar" class="interface">
 
     <a class="toc_title" href="#">
-      Backbone.js <span class="version">(1.0.0)</span>
+      Backbone.js <span class="version">(1.1.0)</span>
     </a>
     <ul class="toc_section">
       <li>&raquo; <a href="http://github.com/jashkenas/backbone">GitHub Repository</a></li>
@@ -427,6 +427,7 @@
       <li>– <a href="#View-setElement">setElement</a></li>
       <li>– <a href="#View-attributes">attributes</a></li>
       <li>– <a href="#View-dollar">$ (jQuery)</a></li>
+      <li>– <a href="#View-template">template</a></li>
       <li>– <a href="#View-render">render</a></li>
       <li>– <a href="#View-remove">remove</a></li>
       <li>– <a href="#View-delegateEvents">delegateEvents</a></li>
@@ -465,6 +466,7 @@
       <li>– <a href="#examples-irccloud">IRCCloud</a></li>
       <li>– <a href="#examples-pitchfork">Pitchfork</a></li>
       <li>– <a href="#examples-spin">Spin</a></li>
+      <li>– <a href="#examples-zocdoc">ZocDoc</a></li>
       <li>– <a href="#examples-walmart">Walmart Mobile</a></li>
       <li>– <a href="#examples-groupon">Groupon Now!</a></li>
       <li>– <a href="#examples-basecamp">Basecamp</a></li>
@@ -480,7 +482,6 @@
       <li>– <a href="#examples-cloudapp">CloudApp</a></li>
       <li>– <a href="#examples-seatgeek">SeatGeek</a></li>
       <li>– <a href="#examples-easel">Easel</a></li>
-      <li>– <a href="#examples-prose">Prose</a></li>
       <li>- <a href="#examples-jolicloud">Jolicloud</a></li>
       <li>– <a href="#examples-syllabus">Syllabus</a></li>
       <li>– <a href="#examples-salon">Salon.io</a></li>
@@ -558,13 +559,13 @@
 
     <table>
       <tr>
-        <td><a class="punch" href="backbone.js">Development Version (1.0.0)</a></td>
-        <td class="text"><i>58kb, Full source, tons of comments</i></td>
+        <td><a class="punch" href="backbone.js">Development Version (1.1.0)</a></td>
+        <td class="text"><i>59kb, Full source, tons of comments</i></td>
       </tr>
       <tr>
-        <td><a class="punch" href="backbone-min.js">Production Version (1.0.0)</a></td>
+        <td><a class="punch" href="backbone-min.js">Production Version (1.1.0)</a></td>
         <td class="text" style="line-height: 16px;">
-          <i>6.3kb, Packed and gzipped</i><br />
+          <i>6.4kb, Packed and gzipped</i><br />
           <small>(<a href="backbone-min.map">Source Map</a>)</small>
         </td>
       </tr>
@@ -616,6 +617,17 @@
       code that looks into the DOM to find an element with a specific <i>id</i>,
       and update the HTML manually
       &mdash; when the model changes, the views simply update themselves.
+    </p>
+
+    <p>
+      Philosophically, Backbone is an attempt to discover the minimal set
+      of data-structuring (models and collections) and user interface (views
+      and URLs) primitives that are generally useful when building web applications with
+      JavaScript. In an ecosystem where overarching, decides-everything-for-you
+      frameworks are commonplace, and many libraries require your site to be 
+      reorganized to suit their look, feel, and default behavior — Backbone should
+      continue to be a tool that gives you the <i>freedom</i> to design the full
+      experience of your web application.
     </p>
 
     <p>
@@ -992,7 +1004,9 @@ var Library = Backbone.Model.extend({
       gains a <tt>collection</tt> property that will be used to indicate which
       collection the model belongs to, and is used to help compute the model's
       <a href="#Model-url">url</a>. The <tt>model.collection</tt> property is
-      otherwise added automatically when you first add a model to a collection.
+      normally created automatically when you first add a model to a collection.
+      Note that the reverse is not true, as passing this option to the constructor 
+      will not automatically add the model to the collection. Useful, sometimes.
     </p>
 
     <p>
@@ -1684,7 +1698,6 @@ alert(JSON.stringify(collection));
       <li><a href="http://underscorejs.org/#min">min</a></li>
       <li><a href="http://underscorejs.org/#sortBy">sortBy</a></li>
       <li><a href="http://underscorejs.org/#groupBy">groupBy</a></li>
-      <li><a href="http://underscorejs.org/#sortedIndex">sortedIndex</a></li>
       <li><a href="http://underscorejs.org/#shuffle">shuffle</a></li>
       <li><a href="http://underscorejs.org/#toArray">toArray</a></li>
       <li><a href="http://underscorejs.org/#size">size</a></li>
@@ -1723,6 +1736,7 @@ var alphabetical = books.sortBy(function(book) {
       Add a model (or an array of models) to the collection, firing an <tt>"add"</tt>
       event. If a <a href="#Collection-model">model</a> property is defined, you may also pass
       raw attributes objects, and have them be vivified as instances of the model.
+      Returns the added (or preexisting, if duplicate) models.
       Pass <tt>{at: index}</tt> to splice the model into the collection at the
       specified <tt>index</tt>. If you're adding models to the collection that are
       <i>already</i> in the collection, they'll be ignored, unless you pass
@@ -1751,8 +1765,8 @@ ships.add([
     <p id="Collection-remove">
       <b class="header">remove</b><code>collection.remove(models, [options])</code>
       <br />
-      Remove a model (or an array of models) from the collection. Fires a
-      <tt>"remove"</tt> event, which you can use <tt>silent</tt> to suppress.
+      Remove a model (or an array of models) from the collection, and returns them. 
+      Fires a <tt>"remove"</tt> event, which you can use <tt>silent</tt> to suppress.
       The model's index before removal is available to listeners as
       <tt>options.index</tt>.
     </p>
@@ -1764,7 +1778,8 @@ ships.add([
       you have so many models to change that you'd rather just update the collection
       in bulk. Use <b>reset</b> to replace a collection with a new list
       of models (or attribute hashes), triggering a single <tt>"reset"</tt> event
-      at the end. For convenience, within a <tt>"reset"</tt> event, the list of any
+      at the end. Returns the newly-set models.
+      For convenience, within a <tt>"reset"</tt> event, the list of any
       previous models is available as <tt>options.previousModels</tt>.
     </p>
 
@@ -1794,7 +1809,8 @@ ships.add([
       its attributes will be merged; and if the collection contains any models that
       <i>aren't</i> present in the list, they'll be removed. All of the appropriate
       <tt>"add"</tt>, <tt>"remove"</tt>, and <tt>"change"</tt> events are fired
-      as this happens. If you'd like to customize the behavior, you can disable
+      as this happens. Returns the touched models in the collection.
+      If you'd like to customize the behavior, you can disable
       it with options: <tt>{add: false}</tt>, <tt>{remove: false}</tt>, or <tt>{merge: false}</tt>.
     </p>
 
@@ -2619,6 +2635,22 @@ ui.Chapter = Backbone.View.extend({
 });
 </pre>
 
+    <p id="View-template">
+      <b class="header">template</b><code>view.template([data])</code>
+      <br />
+      While templating for a view isn't a function provided directly by Backbone,
+      it's often a nice convention to define a <b>template</b> function on your 
+      views. In this way, when rendering your view, you have convenient access to
+      instance data (<tt>this.model</tt>, <tt>options</tt>, and so on). 
+      For example, using Underscore templates:
+    </p>
+
+<pre>
+var LibraryView = Backbone.View.extend({
+  template: _.template(...)
+});
+</pre>
+
     <p id="View-render">
       <b class="header">render</b><code>view.render()</code>
       <br />
@@ -2631,7 +2663,7 @@ ui.Chapter = Backbone.View.extend({
 
 <pre>
 var Bookmark = Backbone.View.extend({
-  template: _.template(…),
+  template: _.template(...),
   render: function() {
     this.$el.html(this.template(this.model.attributes));
     return this;
@@ -3162,6 +3194,30 @@ var model = localBackbone.Model.extend(...);
       </a>
     </div>
 
+    <h2 id="examples-zocdoc">ZocDoc</h2>
+
+    <p>
+      <a href="http://www.zocdoc.com">ZocDoc</a> helps patients
+      find local, in-network doctors and dentists, see their real-time 
+      availability, and instantly book appointments.
+      On the public side, the webapp uses Backbone.js to handle client-side state and rendering in 
+      <a href="http://www.zocdoc.com/primary-care-doctors/los-angeles-13122pm">search pages</a>
+      and <a href="http://www.zocdoc.com/doctor/nathan-hashimoto-md-58078">doctor profiles</a>. 
+      In addition, the new version of the doctor-facing part of the website is a 
+      large single-page application that 
+      benefits from Backbone's structure and modularity. ZocDoc's Backbone 
+      classes are tested with 
+      <a href="http://pivotal.github.io/jasmine/">Jasmine</a>, and delivered 
+      to the end user with 
+      <a href="http://getcassette.net/">Cassette</a>.
+    </p>
+
+    <div style="text-align: center;">
+      <a href="http://www.zocdoc.com">
+        <img width="510" height="464" data-original="docs/images/zocdoc.jpg" alt="ZocDoc" class="example_retina" />
+      </a>
+    </div>
+
     <h2 id="examples-walmart">Walmart Mobile</h2>
 
     <p>
@@ -3453,26 +3509,6 @@ var model = localBackbone.Model.extend(...);
     <div style="text-align: center;">
       <a href="http://easel.io">
         <img width="550" height="395" data-original="docs/images/easel.png" alt="Easel" class="example_image" />
-      </a>
-    </div>
-
-    <h2 id="examples-prose">Prose</h2>
-
-    <p>
-      <a href="http://prose.io">Prose</a> is a content editor for GitHub,
-      optimized for managing websites built with
-      <a href="http://jekyllrb.com/">Jekyll</a> and GitHub Pages. Prose is
-      itself implemented as a static Jekyll site, using Backbone.js to render
-      the views and handle the routes, as well as
-      <a href="http://github.com/michael/github">Github.js</a>, a small data
-      abstraction layer for manipulating files directly on GitHub. Read more in the
-      <a href="http://developmentseed.org/blog/2012/june/25/prose-a-content-editor-for-github/">official introduction post</a>,
-      or <a href="https://github.com/prose/prose">take a look at the source code</a>.
-    </p>
-
-    <div style="text-align: center;">
-      <a href="http://prose.io">
-        <img width="550" height="447" data-original="docs/images/prose.png" alt="Prose" class="example_image" />
       </a>
     </div>
 
@@ -3978,6 +4014,37 @@ ActiveRecord::Base.include_root_in_json = false
     </p>
 
     <h2 id="changelog">Change Log</h2>
+
+    <b class="header">1.1.0</b> &mdash; <small><i>Oct. 10, 2013</i></small> &mdash; <a href="https://github.com/jashkenas/backbone/compare/1.0.0...1.1.0">Diff</a><br />
+    <ul style="margin-top: 5px;">
+      <li>
+        Made the return values of Collection's <tt>set</tt>, <tt>add</tt>, 
+        <tt>remove</tt>, and <tt>reset</tt> more useful. Instead of returning
+        <tt>this</tt>, they now return the changed (added, removed or updated) 
+        model or list of models.
+      </li>
+      <li>
+        Backbone Views no longer attach "special" options as direct properties
+        on the view (<tt>model</tt>, <tt>attributes</tt>, <tt>className</tt>, and so on).
+      </li>
+      <li>
+        All <tt>"invalid"</tt> events now pass consistent arguments. First the
+        model in question, then the error object, then options.
+      </li>
+      <li>
+        You are no longer permitted to change the <b>id</b> of your model during
+        <tt>parse</tt>. Use <tt>idAttribute</tt> instead.
+      </li>
+      <li>
+        On the other hand, <tt>parse</tt> is now an excellent place to extract
+        and vivify incoming nested JSON into associated submodels.
+      </li>
+      <li>
+        Many tweaks, optimizations and bugfixes relating to Backbone 1.0, 
+        including URL overrides, mutation of options, bulk ordering, trailing
+        slashes, edge-case listener leaks, nested model parsing...
+      </li>
+    </ul>
 
     <b class="header">1.0.0</b> &mdash; <small><i>March 20, 2013</i></small> &mdash; <a href="https://github.com/jashkenas/backbone/compare/0.9.10...1.0.0">Diff</a><br />
     <ul style="margin-top: 5px;">
