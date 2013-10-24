@@ -286,7 +286,7 @@
   <div id="sidebar" class="interface">
 
     <a class="toc_title" href="#">
-      Backbone.js <span class="version">(1.0.0)</span>
+      Backbone.js <span class="version">(1.1.0)</span>
     </a>
     <ul class="toc_section">
       <li>&raquo; <a href="http://github.com/jashkenas/backbone">GitHub Repository</a></li>
@@ -427,6 +427,7 @@
       <li>– <a href="#View-setElement">setElement</a></li>
       <li>– <a href="#View-attributes">attributes</a></li>
       <li>– <a href="#View-dollar">$ (jQuery)</a></li>
+      <li>– <a href="#View-template">template</a></li>
       <li>– <a href="#View-render">render</a></li>
       <li>– <a href="#View-remove">remove</a></li>
       <li>– <a href="#View-delegateEvents">delegateEvents</a></li>
@@ -459,12 +460,14 @@
       <li>– <a href="#examples-foursquare">Foursquare</a></li>
       <li>– <a href="#examples-bitbucket">Bitbucket</a></li>
       <li>– <a href="#examples-disqus">Disqus</a></li>
+      <li>– <a href="#examples-delicious">Delicious</a></li>
       <li>– <a href="#examples-khan-academy">Khan Academy</a></li>
       <li>– <a href="#examples-elife-lens">eLife Lens</a></li>
       <li>– <a href="#examples-do">Do</a></li>
       <li>– <a href="#examples-irccloud">IRCCloud</a></li>
       <li>– <a href="#examples-pitchfork">Pitchfork</a></li>
       <li>– <a href="#examples-spin">Spin</a></li>
+      <li>– <a href="#examples-zocdoc">ZocDoc</a></li>
       <li>– <a href="#examples-walmart">Walmart Mobile</a></li>
       <li>– <a href="#examples-groupon">Groupon Now!</a></li>
       <li>– <a href="#examples-basecamp">Basecamp</a></li>
@@ -480,7 +483,6 @@
       <li>– <a href="#examples-cloudapp">CloudApp</a></li>
       <li>– <a href="#examples-seatgeek">SeatGeek</a></li>
       <li>– <a href="#examples-easel">Easel</a></li>
-      <li>– <a href="#examples-prose">Prose</a></li>
       <li>- <a href="#examples-jolicloud">Jolicloud</a></li>
       <li>– <a href="#examples-syllabus">Syllabus</a></li>
       <li>– <a href="#examples-salon">Salon.io</a></li>
@@ -558,13 +560,13 @@
 
     <table>
       <tr>
-        <td><a class="punch" href="backbone.js">Development Version (1.0.0)</a></td>
-        <td class="text"><i>58kb, Full source, tons of comments</i></td>
+        <td><a class="punch" href="backbone.js">Development Version (1.1.0)</a></td>
+        <td class="text"><i>59kb, Full source, tons of comments</i></td>
       </tr>
       <tr>
-        <td><a class="punch" href="backbone-min.js">Production Version (1.0.0)</a></td>
+        <td><a class="punch" href="backbone-min.js">Production Version (1.1.0)</a></td>
         <td class="text" style="line-height: 16px;">
-          <i>6.3kb, Packed and gzipped</i><br />
+          <i>6.4kb, Packed and gzipped</i><br />
           <small>(<a href="backbone-min.map">Source Map</a>)</small>
         </td>
       </tr>
@@ -581,7 +583,7 @@
 
     <p>
       Backbone's only hard dependency is
-      <b><a href="http://underscorejs.org/">Underscore.js</a></b>.
+      <a href="http://underscorejs.org/">Underscore.js</a> <small>( >= 1.5.0)</small>.
       For RESTful persistence, history support via <a href="#Router">Backbone.Router</a>
       and DOM manipulation with <a href="#View">Backbone.View</a>, include
       <b><a href="http://jquery.com">jQuery</a></b>, and
@@ -619,6 +621,17 @@
     </p>
 
     <p>
+      Philosophically, Backbone is an attempt to discover the minimal set
+      of data-structuring (models and collections) and user interface (views
+      and URLs) primitives that are generally useful when building web applications with
+      JavaScript. In an ecosystem where overarching, decides-everything-for-you
+      frameworks are commonplace, and many libraries require your site to be 
+      reorganized to suit their look, feel, and default behavior — Backbone should
+      continue to be a tool that gives you the <i>freedom</i> to design the full
+      experience of your web application.
+    </p>
+
+    <p>
       If you're new here, and aren't yet quite sure what Backbone is for, start by
       browsing the <a href="#examples">list of Backbone-based projects</a>.
     </p>
@@ -628,10 +641,10 @@
       to execute them.
     </p>
 
-    <h2 id="upgrading">Upgrading to 1.0</h2>
+    <h2 id="upgrading">Upgrading to 1.1</h2>
 
     <p>
-      Backbone <b>1.0</b> should be a fairly painless upgrade from the <b>0.9</b>
+      Backbone <b>1.1</b> should be a fairly painless upgrade from the <b>0.9.X</b>
       series. If you're upgrading from an older version, be sure to check out the
       <a href="#changelog">change log</a>. In brief, a few of the larger breaking
       changes are:
@@ -664,6 +677,16 @@
         <a href="#Model-set">set</a> unless the <tt>{validate:true}</tt>
         option is passed. Model validation now fires an <tt>"invalid"</tt> event instead of
         <tt>"error"</tt>.
+      </li>
+      <li>
+        In 1.1, Backbone Views no longer have the <tt>options</tt> argument
+        attached as <tt>this.options</tt> automatically. Feel free to continue 
+        attaching it if you like.
+      </li>
+      <li>
+        In 1.1, The <b>Collection</b> methods <tt>add</tt>, <tt>remove</tt>, 
+        <tt>set</tt>, <tt>push</tt>, and <tt>shift</tt> now return the model
+        (or models) added or removed from the collection.
       </li>
     </ul>
 
@@ -841,9 +864,9 @@ view.stopListening(model);
       <li><b>"change"</b> (model, options) &mdash; when a model's attributes have changed. </li>
       <li><b>"change:[attribute]"</b> (model, value, options) &mdash; when a specific attribute has been updated. </li>
       <li><b>"destroy"</b> (model, collection, options) &mdash; when a model is <a href="#Model-destroy">destroyed</a>. </li>
-      <li><b>"request"</b> (model, xhr, options) &mdash; when a model (or collection) has started a request to the server. </li>
-      <li><b>"sync"</b> (model, resp, options) &mdash; when a model (or collection) has been successfully synced with the server. </li>
-      <li><b>"error"</b> (model, xhr, options) &mdash; when a model's <a href="#Model-save">save</a> call fails on the server. </li>
+      <li><b>"request"</b> (model, collection, xhr, options) &mdash; when a model or collection has started a request to the server. </li>
+      <li><b>"sync"</b> (model, collection, resp, options) &mdash; when a model or collection has been successfully synced with the server. </li>
+      <li><b>"error"</b> (model, collection, xhr, options) &mdash; when a model's <a href="#Model-save">save</a> call fails on the server. </li>
       <li><b>"invalid"</b> (model, error, options) &mdash; when a model's <a href="#Model-validate">validation</a> fails on the client. </li>
       <li><b>"route:[name]"</b> (params) &mdash; Fired by the router when a specific route is matched.</li>
       <li><b>"route"</b> (route, params) &mdash; Fired by the router when <i>any</i> route has been matched.</li>
@@ -853,7 +876,7 @@ view.stopListening(model);
 
     <p>
       Generally speaking, when calling a function that emits an event
-      (<tt>model.set()</tt>, <tt>collection.add</tt>, and so on...),
+      (<tt>model.set</tt>, <tt>collection.add</tt>, and so on...),
       if you'd like to prevent the event from being triggered, you may pass
       <tt>{silent: true}</tt> as an option. Note that this is <i>rarely</i>,
       perhaps even never, a good idea. Passing through a specific flag
@@ -992,7 +1015,9 @@ var Library = Backbone.Model.extend({
       gains a <tt>collection</tt> property that will be used to indicate which
       collection the model belongs to, and is used to help compute the model's
       <a href="#Model-url">url</a>. The <tt>model.collection</tt> property is
-      otherwise added automatically when you first add a model to a collection.
+      normally created automatically when you first add a model to a collection.
+      Note that the reverse is not true, as passing this option to the constructor 
+      will not automatically add the model to the collection. Useful, sometimes.
     </p>
 
     <p>
@@ -1418,8 +1443,7 @@ if (!one.isValid()) {
       the server. If your models are located somewhere else, override this method
       with the correct logic. Generates URLs of the form: <tt>"[collection.url]/[id]"</tt>
       by default, but you may override by specifying an explicit <tt>urlRoot</tt>
-      if the model's collection shouldn't be taken into account. You can also
-      pass in the model's <tt>url</tt> as an option when instantiating it.
+      if the model's collection shouldn't be taken into account.
     </p>
 
     <p>
@@ -1684,7 +1708,6 @@ alert(JSON.stringify(collection));
       <li><a href="http://underscorejs.org/#min">min</a></li>
       <li><a href="http://underscorejs.org/#sortBy">sortBy</a></li>
       <li><a href="http://underscorejs.org/#groupBy">groupBy</a></li>
-      <li><a href="http://underscorejs.org/#sortedIndex">sortedIndex</a></li>
       <li><a href="http://underscorejs.org/#shuffle">shuffle</a></li>
       <li><a href="http://underscorejs.org/#toArray">toArray</a></li>
       <li><a href="http://underscorejs.org/#size">size</a></li>
@@ -1723,6 +1746,7 @@ var alphabetical = books.sortBy(function(book) {
       Add a model (or an array of models) to the collection, firing an <tt>"add"</tt>
       event. If a <a href="#Collection-model">model</a> property is defined, you may also pass
       raw attributes objects, and have them be vivified as instances of the model.
+      Returns the added (or preexisting, if duplicate) models.
       Pass <tt>{at: index}</tt> to splice the model into the collection at the
       specified <tt>index</tt>. If you're adding models to the collection that are
       <i>already</i> in the collection, they'll be ignored, unless you pass
@@ -1751,8 +1775,8 @@ ships.add([
     <p id="Collection-remove">
       <b class="header">remove</b><code>collection.remove(models, [options])</code>
       <br />
-      Remove a model (or an array of models) from the collection. Fires a
-      <tt>"remove"</tt> event, which you can use <tt>silent</tt> to suppress.
+      Remove a model (or an array of models) from the collection, and returns them. 
+      Fires a <tt>"remove"</tt> event, which you can use <tt>silent</tt> to suppress.
       The model's index before removal is available to listeners as
       <tt>options.index</tt>.
     </p>
@@ -1764,7 +1788,8 @@ ships.add([
       you have so many models to change that you'd rather just update the collection
       in bulk. Use <b>reset</b> to replace a collection with a new list
       of models (or attribute hashes), triggering a single <tt>"reset"</tt> event
-      at the end. For convenience, within a <tt>"reset"</tt> event, the list of any
+      at the end. Returns the newly-set models.
+      For convenience, within a <tt>"reset"</tt> event, the list of any
       previous models is available as <tt>options.previousModels</tt>.
     </p>
 
@@ -1794,7 +1819,8 @@ ships.add([
       its attributes will be merged; and if the collection contains any models that
       <i>aren't</i> present in the list, they'll be removed. All of the appropriate
       <tt>"add"</tt>, <tt>"remove"</tt>, and <tt>"change"</tt> events are fired
-      as this happens. If you'd like to customize the behavior, you can disable
+      as this happens. Returns the touched models in the collection.
+      If you'd like to customize the behavior, you can disable
       it with options: <tt>{add: false}</tt>, <tt>{remove: false}</tt>, or <tt>{merge: false}</tt>.
     </p>
 
@@ -2519,13 +2545,10 @@ var DocumentRow = Backbone.View.extend({
     <p id="View-constructor">
       <b class="header">constructor / initialize</b><code>new View([options])</code>
       <br />
-      When creating a new View, the options you pass &mdash; after being merged
-      into any default options already present on the view &mdash;
-      are attached to the view as <tt>this.options</tt> for future reference.
       There are several special
       options that, if passed, will be attached directly to the view:
       <tt>model</tt>, <tt>collection</tt>,
-      <tt>el</tt>, <tt>id</tt>, <tt>className</tt>, <tt>tagName</tt> and <tt>attributes</tt>.
+      <tt>el</tt>, <tt>id</tt>, <tt>className</tt>, <tt>tagName</tt>, <tt>attributes</tt> and <tt>events</tt>.
       If the view defines an <b>initialize</b> function, it will be called when
       the view is first created. If you'd like to create a view that references
       an element <i>already</i> in the DOM, pass in the element as an option:
@@ -2619,6 +2642,22 @@ ui.Chapter = Backbone.View.extend({
 });
 </pre>
 
+    <p id="View-template">
+      <b class="header">template</b><code>view.template([data])</code>
+      <br />
+      While templating for a view isn't a function provided directly by Backbone,
+      it's often a nice convention to define a <b>template</b> function on your 
+      views. In this way, when rendering your view, you have convenient access to
+      instance data. 
+      For example, using Underscore templates:
+    </p>
+
+<pre>
+var LibraryView = Backbone.View.extend({
+  template: _.template(...)
+});
+</pre>
+
     <p id="View-render">
       <b class="header">render</b><code>view.render()</code>
       <br />
@@ -2631,7 +2670,7 @@ ui.Chapter = Backbone.View.extend({
 
 <pre>
 var Bookmark = Backbone.View.extend({
-  template: _.template(…),
+  template: _.template(...),
   render: function() {
     this.$el.html(this.template(this.model.attributes));
     return this;
@@ -2789,7 +2828,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="examples/todos/index.html">
-        <img width="400" height="427" data-original="docs/images/todos.png" alt="Todos" class="example_image" />
+        <img width="400" height="427" data-original="docs/images/todos.jpg" alt="Todos" class="example_retina" />
       </a>
     </div>
 
@@ -2806,7 +2845,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.documentcloud.org/public/#search/">
-        <img width="550" height="453" data-original="docs/images/dc-workspace.png" alt="DocumentCloud Workspace" class="example_image" />
+        <img width="550" height="453" data-original="docs/images/dc-workspace.jpg" alt="DocumentCloud Workspace" class="example_retina" />
       </a>
     </div>
 
@@ -2825,7 +2864,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://usatoday.com">
-        <img width="550" height="532" data-original="docs/images/usa-today.png" alt="USA Today" class="example_image" />
+        <img width="550" height="532" data-original="docs/images/usa-today.jpg" alt="USA Today" class="example_retina" />
       </a>
     </div>
 
@@ -2846,7 +2885,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://rdio.com/new">
-        <img width="550" height="344" data-original="docs/images/rdio.png" alt="Rdio" class="example_image" />
+        <img width="550" height="344" data-original="docs/images/rdio.jpg" alt="Rdio" class="example_retina" />
       </a>
     </div>
 
@@ -2864,7 +2903,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://hulu.com">
-        <img width="550" height="449" data-original="docs/images/hulu.png" alt="Hulu" class="example_image" />
+        <img width="550" height="449" data-original="docs/images/hulu.jpg" alt="Hulu" class="example_retina" />
       </a>
     </div>
 
@@ -2919,7 +2958,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://gawker.com">
-        <img width="558" height="473" data-original="docs/images/gawker.png" alt="Gawker" class="example_image" />
+        <img width="558" height="473" data-original="docs/images/gawker.jpg" alt="Gawker" class="example_retina" />
       </a>
     </div>
 
@@ -2934,7 +2973,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.getflow.com/">
-        <img width="550" height="416" data-original="docs/images/flow.png" alt="Flow" class="example_image" />
+        <img width="550" height="416" data-original="docs/images/flow.jpg" alt="Flow" class="example_retina" />
       </a>
     </div>
 
@@ -2954,7 +2993,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.gilt.com/">
-        <img width="550" height="444" data-original="docs/images/gilt.jpg" alt="Gilt Groupe" class="example_image" />
+        <img width="550" height="444" data-original="docs/images/gilt.jpg" alt="Gilt Groupe" class="example_retina" />
       </a>
     </div>
 
@@ -2991,8 +3030,8 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://wordpress.com/">
-        <img width="550" height="387" data-original="docs/images/wpcom-notifications.png" alt="WordPress.com Notifications"
-    title="WordPress.com Notifications" class="example_image" />
+        <img width="550" height="387" data-original="docs/images/wpcom-notifications.jpg" alt="WordPress.com Notifications"
+    title="WordPress.com Notifications" class="example_retina" />
       </a>
     </div>
 
@@ -3008,7 +3047,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://foursquare.com">
-        <img width="550" height="427" data-original="docs/images/foursquare.png" alt="Foursquare" class="example_image" />
+        <img width="550" height="427" data-original="docs/images/foursquare.jpg" alt="Foursquare" class="example_retina" />
       </a>
     </div>
 
@@ -3028,7 +3067,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.bitbucket.org">
-        <img width="550" height="356" data-original="docs/images/bitbucket.png" alt="Bitbucket" class="example_image" />
+        <img width="550" height="356" data-original="docs/images/bitbucket.jpg" alt="Bitbucket" class="example_retina" />
       </a>
     </div>
 
@@ -3044,7 +3083,26 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.disqus.com">
-        <img width="550" height="454" data-original="docs/images/disqus.png" alt="Disqus" class="example_image" />
+        <img width="550" height="454" data-original="docs/images/disqus.jpg" alt="Disqus" class="example_retina" />
+      </a>
+    </div>
+
+    <h2 id="examples-delicious">Delicious</h2>
+
+    <p>
+      <a href="https://delicious.com/">Delicious</a> is a social bookmarking 
+      platform making it easy to save, sort, and store bookmarks from across 
+      the web. Delicious uses <a href="http://chaplinjs.org">Chaplin.js</a>, 
+      Backbone.js and AppCache to build a full-featured MVC web app. 
+      The use of Backbone helped the website and 
+      <a href="http://delicious.com/tools">mobile apps</a> share a 
+      single API service, and the reuse of the model tier made it significantly 
+      easier to share code during the recent Delicious redesign.
+    </p>
+
+    <div style="text-align: center;">
+      <a href="http://www.delicious.com">
+        <img width="510" height="321" data-original="docs/images/delicious.jpg" alt="Delicious" class="example_retina" />
       </a>
     </div>
 
@@ -3064,7 +3122,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.khanacademy.org">
-        <img width="550" height="454" data-original="docs/images/khan-academy.png" alt="Khan Academy" class="example_image" />
+        <img width="550" height="454" data-original="docs/images/khan-academy.jpg" alt="Khan Academy" class="example_retina" />
       </a>
     </div>
 
@@ -3087,7 +3145,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://elifesciences.github.io/lens/#about/figures/all/video_video1">
-        <img width="510" height="383" data-original="docs/images/lens.png" alt="eLife Lens" class="example_retina" />
+        <img width="510" height="383" data-original="docs/images/lens.jpg" alt="eLife Lens" class="example_retina" />
       </a>
     </div>
 
@@ -3141,7 +3199,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://pitchfork.com/">
-        <img width="550" height="428" data-original="docs/images/pitchfork.png" alt="Pitchfork" class="example_image" />
+        <img width="550" height="428" data-original="docs/images/pitchfork.jpg" alt="Pitchfork" class="example_retina" />
       </a>
     </div>
 
@@ -3158,7 +3216,31 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://spin.com/">
-        <img width="550" height="543" data-original="docs/images/spin.png" alt="Spin" class="example_image" />
+        <img width="550" height="543" data-original="docs/images/spin.jpg" alt="Spin" class="example_retina" />
+      </a>
+    </div>
+
+    <h2 id="examples-zocdoc">ZocDoc</h2>
+
+    <p>
+      <a href="http://www.zocdoc.com">ZocDoc</a> helps patients
+      find local, in-network doctors and dentists, see their real-time
+      availability, and instantly book appointments.
+      On the public side, the webapp uses Backbone.js to handle client-side state and rendering in
+      <a href="http://www.zocdoc.com/primary-care-doctors/los-angeles-13122pm">search pages</a>
+      and <a href="http://www.zocdoc.com/doctor/nathan-hashimoto-md-58078">doctor profiles</a>.
+      In addition, the new version of the doctor-facing part of the website is a
+      large single-page application that
+      benefits from Backbone's structure and modularity. ZocDoc's Backbone
+      classes are tested with
+      <a href="http://pivotal.github.io/jasmine/">Jasmine</a>, and delivered
+      to the end user with
+      <a href="http://getcassette.net/">Cassette</a>.
+    </p>
+
+    <div style="text-align: center;">
+      <a href="http://www.zocdoc.com">
+        <img width="510" height="464" data-original="docs/images/zocdoc.jpg" alt="ZocDoc" class="example_retina" />
       </a>
     </div>
 
@@ -3179,7 +3261,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://mobile.walmart.com/r/phoenix">
-        <img width="256" height="500" data-original="docs/images/walmart-mobile.png" alt="Walmart Mobile" class="example_image" />
+        <img width="256" height="534" data-original="docs/images/walmart-mobile.png" alt="Walmart Mobile" class="example_image" />
       </a>
     </div>
 
@@ -3201,7 +3283,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.groupon.com/now">
-        <img width="550" height="466" data-original="docs/images/groupon.png" alt="Groupon Now!" class="example_image" />
+        <img width="550" height="466" data-original="docs/images/groupon.jpg" alt="Groupon Now!" class="example_retina" />
       </a>
     </div>
 
@@ -3218,7 +3300,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://basecamp.com/calendar">
-        <img width="530" height="380" data-original="docs/images/basecamp-calendar.jpg" alt="Basecamp Calendar" class="example_image" />
+        <img width="530" height="380" data-original="docs/images/basecamp-calendar.jpg" alt="Basecamp Calendar" class="example_retina" />
       </a>
     </div>
 
@@ -3239,7 +3321,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://slaveryfootprint.org/survey">
-        <img width="550" height="394" data-original="docs/images/slavery-footprint.png" alt="Slavery Footprint" class="example_image" />
+        <img width="550" height="394" data-original="docs/images/slavery-footprint.jpg" alt="Slavery Footprint" class="example_retina" />
       </a>
     </div>
 
@@ -3259,7 +3341,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="https://stripe.com">
-        <img width="555" height="372" data-original="docs/images/stripe.png" alt="Stripe" class="example_image" />
+        <img width="555" height="372" data-original="docs/images/stripe.png" alt="Stripe" class="example_retina" />
       </a>
     </div>
 
@@ -3278,22 +3360,6 @@ var model = localBackbone.Model.extend(...);
     <div style="text-align: center;">
       <a href="http://m.airbnb.com/">
         <img width="500" height="489" data-original="docs/images/airbnb.png" alt="Airbnb" class="example_image" />
-      </a>
-    </div>
-
-    <h2 id="examples-diaspora">Diaspora</h2>
-
-    <p>
-      <a href="http://www.joindiaspora.com/">Diaspora</a> is a distributed social
-      network, formed from a number of independently operated <i>pods</i>.
-      You own your personal data, and control with whom you share.
-      All of Diaspora is <a href="https://github.com/diaspora/diaspora">open-source</a>
-      code, built with <a href="http://rubyonrails.org/">Rails</a> and Backbone.js.
-    </p>
-
-    <div style="text-align: center;">
-      <a href="http://www.joindiaspora.com/">
-        <img width="550" height="394" data-original="docs/images/diaspora.png" alt="Diaspora" class="example_image" />
       </a>
     </div>
 
@@ -3320,7 +3386,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://m.soundcloud.com">
-        <img width="266" height="500" data-original="docs/images/soundcloud.png" alt="SoundCloud" class="example_image" />
+        <img width="266" height="555" data-original="docs/images/soundcloud.png" alt="SoundCloud" class="example_image" />
       </a>
     </div>
 
@@ -3338,7 +3404,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://artsy.net">
-        <img width="550" height="550" data-original="docs/images/artsy.png" alt="Art.sy" class="example_image" />
+        <img width="550" height="550" data-original="docs/images/artsy.jpg" alt="Art.sy" class="example_retina" />
       </a>
     </div>
 
@@ -3355,7 +3421,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.pandora.com/newpandora">
-        <img width="476" height="359" data-original="docs/images/pandora.png" alt="Pandora" class="example_image" />
+        <img width="476" height="359" data-original="docs/images/pandora.jpg" alt="Pandora" class="example_retina" />
       </a>
     </div>
 
@@ -3379,7 +3445,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://inkling.com">
-        <img width="550" height="361" data-original="docs/images/inkling.png" alt="Inkling" class="example_image" />
+        <img width="550" height="361" data-original="docs/images/inkling.jpg" alt="Inkling" class="example_retina" />
       </a>
     </div>
 
@@ -3399,7 +3465,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.codeschool.com">
-        <img width="550" height="482" data-original="docs/images/code-school.png" alt="Code School" class="example_image" />
+        <img width="550" height="482" data-original="docs/images/code-school.jpg" alt="Code School" class="example_retina" />
       </a>
     </div>
 
@@ -3418,7 +3484,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://getcloudapp.com">
-        <img width="550" height="426" data-original="docs/images/cloudapp.png" alt="CloudApp" class="example_image" />
+        <img width="550" height="426" data-original="docs/images/cloudapp.jpg" alt="CloudApp" class="example_retina" />
       </a>
     </div>
 
@@ -3434,7 +3500,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://seatgeek.com">
-        <img width="550" height="455" data-original="docs/images/seatgeek.png" alt="SeatGeek" class="example_image" />
+        <img width="550" height="455" data-original="docs/images/seatgeek.jpg" alt="SeatGeek" class="example_retina" />
       </a>
     </div>
 
@@ -3452,27 +3518,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://easel.io">
-        <img width="550" height="395" data-original="docs/images/easel.png" alt="Easel" class="example_image" />
-      </a>
-    </div>
-
-    <h2 id="examples-prose">Prose</h2>
-
-    <p>
-      <a href="http://prose.io">Prose</a> is a content editor for GitHub,
-      optimized for managing websites built with
-      <a href="http://jekyllrb.com/">Jekyll</a> and GitHub Pages. Prose is
-      itself implemented as a static Jekyll site, using Backbone.js to render
-      the views and handle the routes, as well as
-      <a href="http://github.com/michael/github">Github.js</a>, a small data
-      abstraction layer for manipulating files directly on GitHub. Read more in the
-      <a href="http://developmentseed.org/blog/2012/june/25/prose-a-content-editor-for-github/">official introduction post</a>,
-      or <a href="https://github.com/prose/prose">take a look at the source code</a>.
-    </p>
-
-    <div style="text-align: center;">
-      <a href="http://prose.io">
-        <img width="550" height="447" data-original="docs/images/prose.png" alt="Prose" class="example_image" />
+        <img width="550" height="395" data-original="docs/images/easel.jpg" alt="Easel" class="example_retina" />
       </a>
     </div>
 
@@ -3530,7 +3576,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://salon.io">
-        <img width="550" height="483" data-original="docs/images/salon.png" alt="Salon.io" class="example_image" />
+        <img width="550" height="483" data-original="docs/images/salon.jpg" alt="Salon.io" class="example_retina" />
       </a>
     </div>
 
@@ -3551,7 +3597,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://mapbox.github.com/tilemill/">
-        <img width="544" height="375" data-original="docs/images/tilemill.png" alt="TileMill" class="example_image" />
+        <img width="544" height="375" data-original="docs/images/tilemill.jpg" alt="TileMill" class="example_retina" />
       </a>
     </div>
 
@@ -3567,7 +3613,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://blossom.io">
-        <img width="550" height="360" data-original="docs/images/blossom.png" alt="Blossom" class="example_image" />
+        <img width="550" height="367" data-original="docs/images/blossom.jpg" alt="Blossom" class="example_retina" />
       </a>
     </div>
 
@@ -3584,7 +3630,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://trello.com">
-        <img width="550" height="416" data-original="docs/images/trello.png" alt="Trello" class="example_image" />
+        <img width="550" height="416" data-original="docs/images/trello.jpg" alt="Trello" class="example_retina" />
       </a>
     </div>
 
@@ -3609,7 +3655,7 @@ var model = localBackbone.Model.extend(...);
 
     <div style="text-align: center;">
       <a href="http://www.tzigla.com/">
-        <img width="550" height="376" data-original="docs/images/tzigla.png" alt="Tzigla" class="example_image" />
+        <img width="550" height="376" data-original="docs/images/tzigla.jpg" alt="Tzigla" class="example_retina" />
       </a>
     </div>
 
@@ -3978,6 +4024,37 @@ ActiveRecord::Base.include_root_in_json = false
     </p>
 
     <h2 id="changelog">Change Log</h2>
+
+    <b class="header">1.1.0</b> &mdash; <small><i>Oct. 10, 2013</i></small> &mdash; <a href="https://github.com/jashkenas/backbone/compare/1.0.0...1.1.0">Diff</a><br />
+    <ul style="margin-top: 5px;">
+      <li>
+        Made the return values of Collection's <tt>set</tt>, <tt>add</tt>, 
+        <tt>remove</tt>, and <tt>reset</tt> more useful. Instead of returning
+        <tt>this</tt>, they now return the changed (added, removed or updated) 
+        model or list of models.
+      </li>
+      <li>
+        Backbone Views no longer automatically attach options passed to the constructor as 
+        <tt>this.options</tt>, but you can do it yourself if you prefer.
+      </li>
+      <li>
+        All <tt>"invalid"</tt> events now pass consistent arguments. First the
+        model in question, then the error object, then options.
+      </li>
+      <li>
+        You are no longer permitted to change the <b>id</b> of your model during
+        <tt>parse</tt>. Use <tt>idAttribute</tt> instead.
+      </li>
+      <li>
+        On the other hand, <tt>parse</tt> is now an excellent place to extract
+        and vivify incoming nested JSON into associated submodels.
+      </li>
+      <li>
+        Many tweaks, optimizations and bugfixes relating to Backbone 1.0, 
+        including URL overrides, mutation of options, bulk ordering, trailing
+        slashes, edge-case listener leaks, nested model parsing...
+      </li>
+    </ul>
 
     <b class="header">1.0.0</b> &mdash; <small><i>March 20, 2013</i></small> &mdash; <a href="https://github.com/jashkenas/backbone/compare/0.9.10...1.0.0">Diff</a><br />
     <ul style="margin-top: 5px;">
