@@ -1609,7 +1609,7 @@ var Library = Backbone.Collection.extend({
 
     <p>
       A collection can also contain polymorphic models by overriding this property
-      with a function that returns a model.
+      with a constructor that returns a model.
     </p>
 
 <pre>
@@ -2830,28 +2830,6 @@ var model = localBackbone.Model.extend(...);
       <li><b>"all"</b> &mdash; this special event fires for <i>any</i> triggered event, passing the event name as the first argument. </li>
     </ul>
 
-
-   <p id="FAQ-events">
-      <b class="header">Catalog of Events</b>
-      <br />
-      Here's a list of all of the built-in events that Backbone.js can fire.
-      You're also free to trigger your own events on Models and Views as you
-      see fit.
-    </p>
-
-    <ul class="small">
-      <li><b>"add"</b> (model, collection, options) &mdash; when a model is added to a collection. </li>
-      <li><b>"remove"</b> (model, collection, options) &mdash; when a model is removed from a collection. </li>
-      <li><b>"reset"</b> (collection, options) &mdash; when the collection's entire contents have been replaced. </li>
-      <li><b>"change"</b> (model, options) &mdash; when a model's attributes have changed. </li>
-      <li><b>"change:[attribute]"</b> (model, value, options) &mdash; when a specific attribute has been updated. </li>
-      <li><b>"destroy"</b> (model, collection, options) &mdash; when a model is <a href="#Model-destroy">destroyed</a>. </li>
-      <li><b>"sync"</b> (model, resp, options) &mdash; triggers whenever a model has been successfully synced to the server. </li>
-      <li><b>"error"</b> (model, collection) &mdash; when a model's validation fails, or a <a href="#Model-save">save</a> call fails on the server. </li>
-      <li><b>"route:[name]"</b> (router) &mdash; when one of a router's routes has matched. </li>
-      <li><b>"all"</b> &mdash; this special event fires for <i>any</i> triggered event, passing the event name as the first argument. </li>
-    </ul>
-
     <p id="FAQ-why-backbone">
       <b class="header">Why use Backbone, not [other framework X]?</b>
       <br />
@@ -3133,18 +3111,21 @@ inbox.messages.fetch({reset: true});
       <b class="header">Binding "this"</b>
       <br />
       Perhaps the single most common JavaScript "gotcha" is the fact that when
-      you pass a function as a callback, its value for <tt>this</tt> is lost. With
-      Backbone, when dealing with <a href="#Events">events</a> and callbacks,
-      you'll often find it useful to rely on
+      you pass a function as a callback, its value for <tt>this</tt> is lost.
+      When dealing with <a href="#Events">events</a> and callbacks in Backbone,
+      you'll often find it useful to rely on <a href="#Events-listenTo">listenTo</a>
+      or the optional <tt>context</tt> argument that many of Underscore
+      and Backbone's methods use to specify the <tt>this</tt>
+      that will be used when the callback is later invoked. (See
+      <a href="http://underscorejs.org/#each">_.each</a>,
+      <a href="http://underscorejs.org/#map">_.map</a>, and
+      <a href="#Events-on">object.on</a>, to name a few).
+      <a href="#View-delegateEvents">View events</a> are automatically bound to
+      the view's context for you.
+      You may also find it helpful to use
       <a href="http://underscorejs.org/#bind">_.bind</a> and
       <a href="http://underscorejs.org/#bindAll">_.bindAll</a>
       from Underscore.js.
-    </p>
-
-    <p>
-      When binding callbacks to Backbone events, you can choose to pass an optional
-      third argument to specify the <tt>this</tt> that will be used when the
-      callback is later invoked:
     </p>
 
 <pre>
@@ -3155,6 +3136,8 @@ var MessageList = Backbone.View.extend({
     messages.on("reset", this.render, this);
     messages.on("add", this.addMessage, this);
     messages.on("remove", this.removeMessage, this);
+
+    messsages.each(this.addMessage, this);
   }
 
 });
@@ -3192,7 +3175,6 @@ ActiveRecord::Base.include_root_in_json = false
       you can override <a href="#Model-toJSON">toJSON</a> in Backbone to add
       the extra wrapping Rails expects.
     </p>
-
 
     <h2 id="examples">Examples</h2>
 
